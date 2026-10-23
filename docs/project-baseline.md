@@ -16,7 +16,7 @@ Last updated: 24 Oct 2026 (01:15 Bangkok time). **Read this first in every new s
 | Why now | Tourism **competition**: needs an MVP and a **working app/prototype demo** |
 | Demo date | **25 Oct 2026**; about 1 day of build time |
 | Team | 3 people. **No set roles yet** |
-| Product name | **None yet** |
+| Product name | **เปิดบ้าน : AI ช่วยโฮมสเตย์ชนบทขึ้น Agoda** (decided 24 Oct) |
 | Pilot province / DASTA area | **Not chosen** |
 | Real-world testing | **None yet.** No owner has been pitched, listed or charged |
 
@@ -140,7 +140,7 @@ The competition overrides the earlier "build nothing until the test passes" rule
 5. **Agoda connection with the AI coach (strongest moment):** tap Add connection on Agoda, send a screenshot of an English Agoda sign-up screen, get a Thai answer and the matching copy card; then show the live card. The actual Agoda sign-up is mocked with real Agoda screenshots.
 6. Business slide: pricing tiers, value logic, break-even, sponsor model.
 
-**Still to decide:** team roles, product name, sample owner/village, real LINE OA on the day or screenshots.
+**Still to decide:** team roles, sample owner/village, real LINE OA on the day or screenshots.
 
 ---
 
@@ -160,7 +160,6 @@ The competition overrides the earlier "build nothing until the test passes" rule
 **Competition (urgent)**
 - Competition name, judging criteria, demo length and format?
 - Team roles for the 3 members?
-- Product name?
 
 **Product**
 - Keep human review of every draft, or automated checks with review only for flagged cases?

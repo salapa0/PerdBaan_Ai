@@ -1,4 +1,6 @@
-# Rural Tourism AI Listing (working title, name to be added)
+# เปิดบ้าน : AI ช่วยโฮมสเตย์ชนบทขึ้น Agoda
+
+*English working title: Rural Tourism AI Listing*
 
 AI-assisted advertising and listing service for rural Thai tourism owners. Owners fill a guided form inside LINE, AI writes the listing in Thai, English and Chinese, and an AI connection coach walks them through getting live on Agoda. We take no bookings, payments or commission (B2B agency model).
 
