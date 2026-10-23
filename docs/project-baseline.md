@@ -16,7 +16,7 @@ Last updated: 24 Oct 2026 (01:15 Bangkok time). **Read this first in every new s
 | Why now | Tourism **competition**: needs an MVP and a **working app/prototype demo** |
 | Demo date | **25 Oct 2026**; about 1 day of build time |
 | Team | 3 people. **No set roles yet** |
-| Product name | **เปิดบ้าน : AI ช่วยโฮมสเตย์ชนบทขึ้น Agoda** (decided 24 Oct) |
+| Product name | **เปิดบ้าน : AI helps rural homestays get listed on Agoda** (decided 24 Oct) |
 | Pilot province / DASTA area | **Not chosen** |
 | Real-world testing | **None yet.** No owner has been pitched, listed or charged |
 
