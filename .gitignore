@@ -1,0 +1,22 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Node / tooling
+node_modules/
+npm-debug.log*
+
+# Secrets and local config
+.env
+.env.*
+
+# Local AI models and caches (download separately with Ollama)
+*.gguf
+*.safetensors
+.ollama/
+
+# Logs and temp
+*.log
+tmp/
