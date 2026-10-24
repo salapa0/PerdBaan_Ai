@@ -1,11 +1,18 @@
 # src/screens: what the owner sees on the phone
 
-1. `chatHome.js`: LINE chat with the official account, rich menu and keyboard bar
-2. `intake.js`: the 3-step form (rooms and prices, photos, quick questions and contact)
-3. `generating.js`: "AI is writing your listing"
-4. `preview.js`: the listing preview in TH / EN / 中文, approve or request a change
-5. `connections.js`: the Agoda card and its status
-6. `coach.js`: the step-by-step Agoda sign-up coach, including screenshot help
-7. `liveCard.js`: the "now live on Agoda" card
+All the screens the app shows are in `owner.js`. It returns HTML strings; `router.js` puts them in the phone. Screens call `rules/` and `data/`; they do not hold that logic.
 
-Screens 2 to 6 open like LINE mini-apps (LIFF pages) with their own header. Screens call `ai/` and `rules/`; they do not contain that logic.
+**LINE chat** (`chat`, `review`, `live` steps)
+- Bot and owner messages, cards with buttons (preview ready, go to connections, add another channel, finance), one announcement card per channel that is live, and simulated guest messages.
+- The rich menu at the bottom is a 3 × 2 grid: กรอกข้อมูล · ดูตัวอย่าง · การเชื่อมต่อ · ถามเรื่อง Agoda · การเงิน · ช่วยเหลือ. Tiles that are not ready yet are greyed and explain why when tapped.
+
+**LIFF mini-app pages** (open with their own header: back arrow, title, ✕ to return to the chat)
+- `form`: number of rooms, room types with count and price, amenities (with an "other" box), photos (first photo is the cover), optional notes
+- `writing`: "AI is writing your listing"
+- `preview`: the listing in ไทย / English / 中文 with photo gallery, price badge and the approve button
+- `connections`: one card per channel, read from `data/platforms.js` (Agoda, Google Business Profile)
+- `coach`: step-by-step sign-up for the chosen channel with tap-to-copy cards, and screenshot help at the last step
+- `finance`: free until the first guest, then the Standard plan, plus a summary of simulated guests
+- `help`: staff hours, hotline (sample data) and common questions
+
+The older separate screen files in this folder (`chatHome.js`, `intake.js`, `generating.js`, `preview.js`, `connections.js`, `coach.js`, `liveCard.js`) are not loaded; see `../README.md`.

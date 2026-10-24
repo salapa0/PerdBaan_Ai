@@ -2,6 +2,8 @@
 
 Last updated: 24 Oct 2026 (01:15 Bangkok time). **Read this first in every new session.** It summarises the whole project.
 
+> **Update, 25 Oct 2026 (demo build).** The decisions below are still the business baseline, with these differences in the demo: it connects **two channels** (Agoda and Google Business Profile) to show that "a channel is data, not a rebuild"; there is **no human review of each draft** (automated checks, then the owner approves); and it shows a **simulated finance page** (free until the first guest, then Standard ฿490/month; no commission). Treat "Agoda only" as the decision for the real product's first release, not a description of the demo.
+
 ---
 
 ## 1. Situation at a glance

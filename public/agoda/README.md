@@ -1,5 +1,7 @@
 # public/agoda
 
-The Agoda sign-up screens shown in the coach, `agoda-01` … `agoda-08`, plus `agoda-live` (shown offline when the owner taps "view listing").
+Simulated Agoda sign-up pages, `agoda-01` … `agoda-08`, plus `agoda-live`. They are labelled simulation mock-ups.
 
-The current `.svg` files are labelled simulation mock-ups. To use real captured screenshots, save them here as `agoda-01.png` … `agoda-08.png` and set `agodaScreenExt: 'png'` in `src/config.js`. The coach matches its Thai answers by these file names. The field order lives in `src/data/agodaFields.js`.
+**The current app does not load these files.** Its coach (`src/screens/owner.js`) draws simplified placeholder pages for every channel, and `agodaScreenExt` in `src/config.js` is not used. The images belong to the older coach screen described in `src/README.md`.
+
+To show real captured screenshots, the coach in `src/screens/owner.js` would need to display them, one per sign-up step. Keep the originals in `content/agoda-screenshots/`.

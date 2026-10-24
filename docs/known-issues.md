@@ -2,6 +2,24 @@
 
 Running list of things that need attention. Add new items at the top.
 
+## Older screen and AI files are still in the repo but not loaded
+
+**Status:** open · noted 2026-10-25
+
+**Symptom:** Editing `src/screens/chatHome.js`, `intake.js`, `generating.js`, `preview.js`, `connections.js`, `coach.js`, `liveCard.js` or `src/ui/ui.js` changes nothing on the page. The same goes for `src/ai/generateListing.js`, `prompts.js`, `schemas.js`, `templateDraft.js`, `src/data/coachScreens.js`, `snapshots.js`, `src/rules/photoEdit.js`, `src/ui/chat.js`, `src/ui/style.css`, `public/agoda/*.svg` and `content/*.js`.
+
+**Cause:** The running app (`src/app.js` → `actions.js`, `router.js`, `screens/owner.js`, `console/console.js`) replaced an earlier set of separate screens. `src/ui/ui.js` still imports a `doAction` that `router.js` no longer exports, so those files cannot run as they are. Features that exist only there: the 3-step form with the "brighten" photo button, the readiness checklist and OTP step in the coach, the "request change" flow, and the Shift+1 … 7 snapshots.
+
+**Fix options:** Delete them once the team agrees nothing is needed, or move the features worth keeping into `owner.js`. The README files in `src/` describe which files are live.
+
+## Other text and assets to refresh
+
+**Status:** open · noted 2026-10-25
+
+- `docs/images/hero.jpg` shows an older preview page (no photo gallery or price badge).
+- The help page's hotline (02-123-4567), hours and "answers within 1 hour" are sample data; the page marks the number as a sample.
+- The coach draws simplified placeholder sign-up pages instead of real Agoda / Google screenshots.
+
 ## GitHub Pages is not publishing a live site
 
 **Status:** open · noted 2026-10-25
@@ -28,9 +46,11 @@ branch/merge problem.
 - Decide what the live page *should* be, since the standalone pricing page was
   intentionally dropped.
 
-## Finance feature branch is held, pending main's new structure
+## Finance feature branch was held, pending main's new structure
 
-**Status:** open · noted 2026-10-25
+**Status:** appears resolved · noted 2026-10-25
+
+The finance tile and simulated customer pings now exist in the current code (`financeHtml()` in `src/screens/owner.js`, `simulateCustomer()` in `src/actions.js`, Shift+C). The text below is the original note; confirm that the `finance-tile-and-customer-ping` branch (`bc8f638`) can be closed.
 
 `main` received commit `6dfbdb1` ("Add files via upload") that restructured the
 app (split `screens/owner.js` into separate screen files, added a photos

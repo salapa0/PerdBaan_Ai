@@ -3,6 +3,15 @@
 As of 24 Oct 2026 (01:30 Bangkok time). Demo: **25 Oct 2026**, about 1 day of build time, team of 3.
 **This file replaces section 7 of docs/project-baseline.md for the build.** All other baseline decisions still apply (Agoda only, no voice, homestays first, online-only AI coach, no bookings/payments).
 
+> **Status, 25 Oct 2026: what the current app does.** The sections below are the original plan; where they differ, this list wins.
+> - **No staff approval step.** The AI draft goes straight to the owner's phone; the console shows the AI source, the automated checks and each channel's progress. The owner is the only approver. (Section 3, item 8 and the cut order mention "Approve & send preview" and console edit fields: not in the current app.)
+> - **Two channels, not Agoda only:** Agoda and Google Business Profile, both defined in `src/data/platforms.js`.
+> - **The form is one LIFF page**, not three steps: number of rooms, room types with count and price, amenities, photos, optional notes. There is no map pin, document, licence or consent step.
+> - **Preview** shows the listing in Thai, English and Chinese with a photo gallery and a suggested price band. "Request change" is not built.
+> - **Rich menu and LIFF pages are simulated in the page** (the real LINE OA is still not coded). The menu now has finance and help tiles.
+> - **Finance page and guest enquiries are simulated:** the Standard plan (฿490/month) is shown after the first simulated guest. No real billing.
+> - **State is in memory only** (no localStorage); there is no Tailwind, the CSS is hand-written.
+
 ---
 
 ## 1. Constraints (decided 24 Oct)

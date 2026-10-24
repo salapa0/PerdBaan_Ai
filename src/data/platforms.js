@@ -19,7 +19,7 @@ export const platforms = [
   {
     id: 'agoda', name: 'Agoda', short: 'Agoda', kind: 'booking',
     role: 'ช่องทางการจอง + รับชำระเงิน',
-    blurb: 'รับการจองและชำระเงินออนไลน์ มีคอมมิชชันต่อการจอง',
+    blurb: 'รับการจองและชำระเงินออนไลน์ Agoda คิดคอมมิชชันต่อการจอง (เปิดบ้านไม่คิด)',
     needs: '',
     verify: { btn: 'จำลอง Agoda อนุมัติ', wait: 'รอ Agoda ตรวจสอบที่พัก (ปกติ 72 ชม.)' },
     screens: [

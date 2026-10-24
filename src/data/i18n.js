@@ -1,6 +1,6 @@
-// Text inside the listing preview card, one block per language (the page header and the bottom
-// button stay Thai on every tab), so the Thai page is all Thai,
-// the English page all English and the Chinese page all Chinese. Add a key to all three.
+// Text inside the listing preview card, one block per language. The page header and the bottom
+// button stay Thai on every tab; everything inside the card follows the tab, so the Thai page is
+// all Thai, the English page all English and the Chinese page all Chinese. Add a key to all three.
 import { TERMS } from './options.js';
 
 export const LANGS = [['th', 'ไทย'], ['en', 'English'], ['zh', '中文']];

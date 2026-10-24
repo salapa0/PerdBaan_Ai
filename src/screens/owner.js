@@ -33,7 +33,7 @@ const cust = (name, h) => `<div class="row"><span class="av cust" aria-hidden="t
 
 function chatHtml() {
   const s = state; let h = '<div class="date">วันนี้</div>';
-  h += bot('สวัสดีค่ะ 👋 เปิดบ้านช่วยให้บ้านพักของคุณขึ้น Agoda ได้ ตอบไม่กี่ข้อ แล้ว AI เขียนประกาศให้ ไม่เก็บค่าคอมมิชชัน');
+  h += bot('สวัสดีค่ะ 👋 เปิดบ้านช่วยให้บ้านพักของคุณขึ้น Agoda และ Google Maps ได้ ตอบไม่กี่ข้อ แล้ว AI เขียนประกาศให้ เราไม่หักค่าคอมมิชชันจากการจอง และฟรีจนกว่าจะได้ลูกค้าคนแรก');
   if (s.started) h += me('เริ่มเลย') + bot('ยินดีค่ะ กรอกข้อมูลบ้านพักไม่กี่ข้อ แล้ว AI จะเขียนประกาศให้');
   if (s.draft) h += me('ให้ AI เขียนประกาศ') + bot('ได้รับข้อมูลแล้วค่ะ AI เขียนประกาศให้เรียบร้อยแล้ว');
   if (s.previewSent) h += fx(`ตัวอย่างประกาศของ ${esc(s.intake.name)} พร้อมแล้ว`, 'ดูตัวอย่าง', 'preview');
@@ -110,11 +110,11 @@ function financeHtml() {
     + (has
         ? `<div class="note"><b>เริ่มแพ็กเกจ Standard · ฿490/เดือน</b><br>คุณได้ลูกค้าคนแรกแล้ว 🎉 ค่าสมาชิกจะเริ่มในรอบบิลถัดไป (ขั้นต่ำ 6 เดือน)</div>`
         : `<div class="note"><b>ยังไม่มีค่าใช้จ่าย</b><br>ลงประกาศได้เต็มที่ ยังไม่ต้องจ่ายจนกว่าจะมีลูกค้าคนแรกเข้ามา</div>`)
-    + `<p class="lbl">ยอดจองจากลูกค้า</p>`
+    + `<p class="lbl">สรุปจากลูกค้าที่ทักเข้ามา</p>`
     + `<div class="agoda">`
-    + row('จำนวนการจอง', `${cs.length} ราย`)
+    + row('ลูกค้าที่ทักเข้ามา', `${cs.length} ราย`)
     + row('จำนวนคืน', `${nights} คืน`)
-    + row('รายได้รวม (ประมาณ)', `฿${gross.toLocaleString('en-US')}`, 'ok')
+    + row('รายได้รวม (ประมาณการ)', `฿${gross.toLocaleString('en-US')}`, 'ok')
     + `</div>`
     + (has
         ? `<p class="lbl">ลูกค้าล่าสุด</p>`
@@ -122,8 +122,8 @@ function financeHtml() {
               `<div class="agoda"><small>${esc(c.time)}</small><b>${esc(c.name)}</b>`
               + `<p class="muted">${esc(c.msg)}</p>`
               + `<p class="ok fine">${c.nights} คืน · ฿${c.amount.toLocaleString('en-US')}</p></div>`).join('')
-        : `<p class="muted center">ยังไม่มีการจอง — เมื่อมีลูกค้าทักเข้ามา ยอดจะแสดงที่นี่</p>`)
-    + `<p class="ok fine center">✓ ไม่หักค่าคอมมิชชัน · เงินทุกบาทเป็นของคุณ</p>`;
+        : `<p class="muted center">ยังไม่มีลูกค้าทักเข้ามา — เมื่อมีลูกค้า ยอดประมาณการจะแสดงที่นี่</p>`)
+    + `<p class="ok fine center">✓ เปิดบ้านไม่หักค่าคอมมิชชัน · ค่าธรรมเนียมของช่องทาง (เช่น Agoda) เป็นไปตามเงื่อนไขของช่องทางนั้น</p>`;
 }
 
 // ---- Help: the "ติดต่อเจ้าหน้าที่" feature, now reached from the ช่วยเหลือ tile ----
@@ -132,7 +132,7 @@ function helpHtml() {
   return `<p class="big center">ติดต่อเจ้าหน้าที่</p>`
     + `<p class="muted center">ทีมงานเปิดบ้านพร้อมช่วยคุณทุกขั้นตอน</p>`
     + `<div class="agoda"><small>เวลาทำการ</small><b>ทุกวัน 9:00–18:00 น.</b><p class="muted">ตอบในแชทไลน์นี้ โดยเฉลี่ยภายใน 1 ชั่วโมง</p></div>`
-    + `<div class="agoda"><small>สายด่วน</small><b>02-123-4567</b><p class="muted">สายด่วนช่วยเหลือเจ้าของบ้านพัก</p></div>`
+    + `<div class="agoda"><small>สายด่วน (เบอร์สาธิต)</small><b>02-123-4567</b><p class="muted">สายด่วนช่วยเหลือเจ้าของบ้านพัก</p></div>`
     + `<p class="lbl">คำถามที่พบบ่อย</p>`
     + `<div class="chipset">${q('สมัครช่องทางยังไง', 'การสมัครช่องทาง')}${q('ค่าบริการเท่าไร', 'ค่าบริการ')}${q('แก้ไขประกาศ', 'การแก้ไขประกาศ')}</div>`;
 }
@@ -143,7 +143,7 @@ function connStatus(p) {
   if (c.live) return { cls: 'ok', text: '✓ เชื่อมต่อแล้ว · ขึ้นจริง' };
   if (c.linkSent) return { cls: 'muted', text: p.link.wait };
   if (c.step > 1 || c.coach) return { cls: 'muted', text: `กำลังเชื่อมต่อ · ขั้นที่ ${Math.min(c.step, n)}/${n}` };
-  return { cls: 'muted', text: 'ยังไม่ได้เชื่อมต่อ · เจ้าหน้าที่จะพาทำทีละขั้น' };
+  return { cls: 'muted', text: 'ยังไม่ได้เชื่อมต่อ · ผู้ช่วย AI จะพาทำทีละขั้น' };
 }
 function connectionsHtml() {
   return platforms.map(p => {

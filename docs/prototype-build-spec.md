@@ -2,6 +2,8 @@
 
 As of 24 Oct 2026. Builds on docs/demo-mvp-scope-local.md. Baseline decisions still apply (Agoda only, no voice, homestays first, online-only AI coach, no bookings/payments).
 
+> **Update, 25 Oct 2026: what was actually built.** Plain HTML + vanilla JS (ES modules), served with `python -m http.server 5173`, and Ollama (Typhoon for Thai + English, Qwen-VL for Chinese and screenshots) as planned. Different from the plan below: **no Tailwind** (one hand-written `src/ui/app.css`); **state in memory only** (no localStorage, no IndexedDB); photos are shrunk JPEG data URLs; Ollama is called with `/api/generate` and `format: "json"` (not `/api/chat` with a schema); all owner screens are in `src/screens/owner.js`; there is a second channel (Google), a finance page and a help page. Files from the earlier plan that are not loaded are listed in `src/README.md`.
+
 ## Locked stack (tech stack session, 24 Oct 01:42)
 Plain HTML + vanilla JS (ES modules) + Tailwind standalone CLI + Noto Sans Thai (bundled), served with `python -m http.server 5173`. Ollama on localhost:11434 with **Typhoon** (Thai + English listing) and **Qwen-VL** (Chinese translation + screenshot coach). `/api/chat` with JSON-schema `format`; hand-written validator; saved JSON fallback per field. State in localStorage, photos in IndexedDB (idb-keyval). Coach "simple" mode: Qwen-VL returns screen_id only; Thai explanation is pre-written per screen.
 
