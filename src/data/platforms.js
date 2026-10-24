@@ -44,6 +44,9 @@ export const platforms = [
     },
     liveMsg: name => `ประกาศของ ${name} ขึ้น Agoda แล้ว รับการจองได้เลยค่ะ`,
     sample: 'https://www.agoda.com/baan-suan-rim-nan/hotel/nan-th.html',
+    // How the listing banner looks on this channel — read by the "preview on each platform" page.
+    // kind 'booking' draws a search-result card (photo + price/night + book button).
+    preview: { brand: '#5392f9', wordmark: 'agoda', caption: 'ผลการค้นหา', cta: 'ดูห้องว่าง', priceNote: 'ต่อคืน' },
   },
   {
     id: 'google', name: 'Google Business Profile', short: 'Google', kind: 'discovery',
@@ -82,6 +85,8 @@ export const platforms = [
     },
     liveMsg: name => `${name} ขึ้นบน Google Maps แล้ว ค้นเจอและรับรีวิวได้เลยค่ะ`,
     sample: 'https://maps.app.goo.gl/baan-suan-rim-nan',
+    // kind 'discovery' draws a Maps business-profile card (name + stars + call/directions/website).
+    preview: { brand: '#1a73e8', wordmark: 'Google', caption: 'โปรไฟล์ธุรกิจ บน Maps', category: 'เกสต์เฮาส์', actions: ['📞 โทร', '🧭 เส้นทาง', '🌐 เว็บไซต์'] },
   },
 ];
 

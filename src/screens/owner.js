@@ -9,6 +9,7 @@ import { suggestPrice } from '../rules/suggestPrice.js';
 export const HEAD = {
   chat: ['line'], review: ['line'], live: ['line'],
   form: ['liff', 'กรอกข้อมูลบ้านพัก'], writing: ['liff', 'AI กำลังเขียน'], preview: ['liff', 'สรุปรายละเอียด'],
+  looks: ['liff', 'ดูตัวอย่างแต่ละช่องทาง'],
   connections: ['liff', 'การเชื่อมต่อ'], coach: ['liff', 'สมัครช่องทาง'],
 };
 export const isChat = st => HEAD[st][0] === 'line';
@@ -53,6 +54,8 @@ function menuHtml() {
 // ---- LIFF pages ----
 const field = (id, label, v, attr = '') => `<label for="f-${id}">${label}</label><input id="f-${id}" data-f="${id}" value="${esc(v)}" ${attr}>`;
 const btn = (label, a, v = '', dis = false, cls = '') => `<button class="btn ${cls}" data-a="${a}" ${v ? `data-v="${v}"` : ''} ${dis ? 'disabled' : ''}>${label}</button>`;
+const LANGS = [['th', 'ไทย'], ['en', 'EN'], ['zh', '中文']];
+const langTabs = L => `<div class="tabs">${LANGS.map(([k, n]) => `<button data-a="setLang" data-v="${k}" class="${L === k ? 'on' : ''}">${n}</button>`).join('')}</div>`;
 
 export function screenHtml() {
   const s = state, i = s.intake, r = i.rooms[0];
@@ -62,16 +65,17 @@ export function screenHtml() {
     case 'writing': return `<div class="spin"></div><p class="center">กำลังเขียนไทย อังกฤษ จีน…</p>`;
     case 'preview': {
       const L = s.lang, d = s.draft, p = suggestPrice(i);
-      const tabs = `<div class="tabs">${[['th', 'ไทย'], ['en', 'EN'], ['zh', '中文']].map(([k, n]) => `<button data-a="setLang" data-v="${k}" class="${L === k ? 'on' : ''}">${n}</button>`).join('')}</div>`;
-      return tabs + `<article class="listing">`
+      return langTabs(L) + `<article class="listing">`
         + `<div class="listing-head"><h3>${esc(d['title_' + L])}</h3><div class="listing-loc">📍 ${esc(i.location)}</div></div>`
         + `<div class="listing-body">`
         + `<div class="price-badge"><b>${p.value}</b><span class="unit">บาท/คืน</span><span class="rng">ช่วง ${p.low}–${p.high}</span></div>`
         + `<p>${esc(d['desc_' + L])}</p>${previewExtra(i)}`
         + `<p class="muted fine">ราคาที่ AI แนะนำจากข้อมูลของคุณ · ติดต่อ ${esc(i.contact.phone)}</p>`
         + `</div></article>`
-        + (s.approved ? `<p class="ok center">✓ คุณอนุมัติประกาศนี้แล้ว</p>` : '');
+        + (s.approved ? `<p class="ok center">✓ คุณอนุมัติประกาศนี้แล้ว</p>` : '')
+        + btn('👀 ดูตัวอย่างบนแต่ละช่องทาง', 'go', 'looks', false, 'ghost');
     }
+    case 'looks': return looksHtml();
     case 'connections': return connectionsHtml();
     case 'coach': return coachHtml();
   }
@@ -159,4 +163,42 @@ function previewExtra(i) {
   const am = allAmenities(i);
   return `<div><p class="plabel">ห้องพัก</p><ul class="plist">${i.rooms.map(r => `<li>${esc(r.name)} × ${r.count} ห้อง · ${esc(r.price)} บาท/คืน</li>`).join('')}</ul></div>`
     + (am.length ? `<div><p class="plabel">สิ่งอำนวยความสะดวก</p><div class="chipset">${am.map(a => `<span class="chip on">${esc(a)}</span>`).join('')}</div></div>` : '');
+}
+
+// ---- "preview on each platform": the same draft dressed up as each channel's own banner ----
+// Layout follows platform.kind; brand colour and chrome labels come from platform.preview (platforms.js).
+function looksHtml() {
+  const s = state, i = s.intake, d = s.draft, L = s.lang, price = suggestPrice(i);
+  return langTabs(L)
+    + `<p class="looks-intro muted">นี่คือตัวอย่างว่าประกาศของคุณจะปรากฏบนแต่ละช่องทางอย่างไร (ภาพจำลอง ยังไม่ขึ้นจริง)</p>`
+    + platforms.map(p => platformBanner(p, d, i, L, price)).join('');
+}
+
+function bannerChrome(pv) {
+  return `<div class="pb-top"><span class="pb-mark">${esc(pv.wordmark)}</span>`
+    + `<span class="pb-cap">${esc(pv.caption)}</span><span class="pb-sim">ภาพจำลอง</span></div>`;
+}
+
+function platformBanner(p, d, i, L, price) {
+  const pv = p.preview, title = esc(d['title_' + L]), loc = esc(i.location);
+  if (p.kind === 'discovery') {
+    return `<section class="pbanner discovery" style="--brand:${esc(pv.brand)}">${bannerChrome(pv)}`
+      + `<div class="pb-g"><div class="pb-thumb" aria-hidden="true">📷</div><div class="pb-ginfo">`
+      + `<h4>${title}</h4>`
+      + `<div class="pb-stars"><span aria-hidden="true">★★★★★</span><small class="muted">ยังไม่มีรีวิว</small></div>`
+      + `<div class="pb-sub">${esc(pv.category)} · ${loc}</div>`
+      + `<div class="pb-open">เปิดอยู่ · เช็คอิน 14:00</div>`
+      + `</div></div>`
+      + `<div class="pb-acts">${pv.actions.map(a => `<span>${esc(a)}</span>`).join('')}</div>`
+      + `</section>`;
+  }
+  const am = allAmenities(i).slice(0, 3);
+  return `<section class="pbanner booking" style="--brand:${esc(pv.brand)}">${bannerChrome(pv)}`
+    + `<div class="pb-hero" aria-hidden="true"><span>📷</span></div>`
+    + `<div class="pb-body"><div class="pb-line"><h4>${title}</h4><span class="pb-new">ใหม่</span></div>`
+    + `<div class="pb-sub">📍 ${loc}</div>`
+    + (am.length ? `<div class="pb-tags">${am.map(a => `<span>${esc(a)}</span>`).join('')}</div>` : '')
+    + `<div class="pb-foot"><div class="pb-price"><b>฿${price.value.toLocaleString('en-US')}</b><small>${esc(pv.priceNote)}</small></div>`
+    + `<span class="pb-cta">${esc(pv.cta)}</span></div>`
+    + `</div></section>`;
 }
