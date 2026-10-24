@@ -1,8 +1,9 @@
 // Staff console: shows the AI draft and automated checks, then watches the owner approval and Agoda sign-up.
 // Staff no longer gate the draft — the AI draft goes straight to the owner, who is the only approver.
-import { state } from '../state.js';
+import { state, conn } from '../state.js';
 import { $, esc } from '../ui/dom.js';
 import { allAmenities } from '../data/options.js';
+import { platforms, getPlatform } from '../data/platforms.js';
 import { runChecks } from '../rules/runChecks.js';
 
 export function renderChecks() {
@@ -10,6 +11,15 @@ export function renderChecks() {
   const f = runChecks(state.draft, state.intake), bad = f.some(x => x.level === 'error');
   $('#checks').innerHTML = f.length ? f.map(x => `<div class="ck ${x.level}">${x.level === 'error' ? '✗' : '!'} ${x.id} ${esc(x.msg)}</div>`).join('') : `<div class="ck ok">✓ ผ่านทุกข้อ</div>`;
   const b = $('#approve'); if (b) b.disabled = bad;
+}
+
+// One status line per platform (live / connecting / waiting / not started).
+function connLines() {
+  return `<p class="muted">ช่องทาง: ${platforms.map(p => {
+    const c = conn(p.id), n = p.screens.length;
+    const st = c.live ? 'ขึ้นจริง ✓' : c.linkSent ? 'รอยืนยัน' : (c.step > 1 || c.coach) ? `${Math.min(c.step, n)}/${n}` : '—';
+    return `${esc(p.short || p.name)}: ${st}`;
+  }).join(' · ')}</p>`;
 }
 
 export function renderConsole() {
@@ -25,9 +35,13 @@ export function renderConsole() {
     h = `<span class="tag ${s.source === 'Live AI' ? 'tag-live' : ''}">${esc(s.source)}</span><div id="checks" class="checks"></div><p class="muted">ห้อง ${s.intake.totalRooms} · ${esc(s.intake.rooms.map(r => `${r.name} ×${r.count} (${r.price}฿)`).join(', '))}<br>สิ่งอำนวยความสะดวก: ${esc(allAmenities(s.intake).join(', ') || '—')}</p>`;
     if (idle && !s.approved) h += `<p class="muted">AI ส่งตัวอย่างให้เจ้าของแล้ว · รอเจ้าของอนุมัติ</p>`;
     else if (st === 'preview') h += `<p class="muted">เจ้าของกำลังดูตัวอย่าง</p>`;
-    else if (st === 'connections' || idle) h += `<p class="muted">เจ้าของอนุมัติแล้ว รอเริ่มสมัคร Agoda</p>`;
-    else if (st === 'coach') h += `<p class="muted">เจ้าของอยู่ขั้นที่ ${Math.min(s.coachStep, 4)}${s.coachStep === 5 ? ' (วางลิงก์)' : '/4'} · ลิงก์: ${s.linkSent ? 'ได้รับแล้ว ✓' : 'ยังไม่ได้รับ'}</p><button class="btn" data-a="simulateAgoda" ${s.linkSent ? '' : 'disabled'}>Simulate Agoda approval (Shift+A)</button>`;
-    else h += `<p class="ok">Agoda อนุมัติแล้ว (จำลอง)</p><button class="btn ghost" data-a="reset">Reset (Shift+R)</button>`;
+    else if (st === 'connections' || idle) h += `<p class="muted">เจ้าของอนุมัติแล้ว รอเริ่มเชื่อมต่อช่องทาง</p>` + connLines();
+    else if (st === 'coach') {
+      const p = getPlatform(s.active), c = conn(), n = p.screens.length;
+      h += `<p class="muted">เชื่อมต่อ ${esc(p.short || p.name)} · ขั้นที่ ${Math.min(c.step, n)}${c.step > n ? ' (วางลิงก์)' : '/' + n} · ลิงก์: ${c.linkSent ? 'ได้รับแล้ว ✓' : 'ยังไม่ได้รับ'}</p>`
+        + `<button class="btn" data-a="simulateAgoda" ${c.linkSent && !c.live ? '' : 'disabled'}>${esc(p.verify.btn)} (Shift+A)</button>` + connLines();
+    }
+    else h += connLines() + `<button class="btn ghost" data-a="reset">Reset (Shift+R)</button>`;
   }
   $('#console-body').innerHTML = h; renderChecks();
 }

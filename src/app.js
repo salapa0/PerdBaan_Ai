@@ -1,4 +1,4 @@
-import { state, subscribe, emit } from './state.js';
+import { state, subscribe, emit, conn } from './state.js';
 import { actions } from './actions.js';
 import { renderPhone, renderDock } from './router.js';
 import { renderConsole, renderChecks } from './console/console.js';
@@ -6,7 +6,7 @@ import { initToolbar } from './toolbar.js';
 import { ping } from './ai/ollama.js';
 import { $ } from './ui/dom.js';
 import { roomSumHtml } from './screens/owner.js';
-import { checkAgodaLink } from './rules/checkAgodaLink.js';
+import { getPlatform } from './data/platforms.js';
 
 subscribe(() => { renderPhone(); renderConsole(); });
 
@@ -17,7 +17,7 @@ document.addEventListener('click', e => {
 document.addEventListener('input', e => {
   const t = e.target;
   if (t.dataset.f) { actions.setField(t.dataset.f, t.value); renderDock(); }
-  else if (t.hasAttribute('data-link')) { state.link = t.value; renderDock(); const m = $('#link-msg'), c = checkAgodaLink(t.value); m.className = c.ok ? 'ok' : 'err'; m.textContent = t.value ? c.msg : ''; }
+  else if (t.hasAttribute('data-link')) { conn().link = t.value; renderDock(); const m = $('#link-msg'), c = getPlatform(state.active).link.check(t.value); m.className = c.ok ? 'ok' : 'err'; m.textContent = t.value ? c.msg : ''; }
   else if (t.dataset.r) { actions.setRoom(...t.dataset.r.split(':'), t.value); $('#room-sum').innerHTML = roomSumHtml(); renderDock(); }
   else if (t.dataset.d) { actions.editDraft(t.dataset.d, t.value); renderChecks(); }
 });

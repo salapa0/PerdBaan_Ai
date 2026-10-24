@@ -1,24 +1,24 @@
 // The owner's screens, styled like LINE: chat with a rich-menu grid, and LIFF mini-app pages.
-import { state } from '../state.js';
+import { state, conn } from '../state.js';
 import { esc } from '../ui/dom.js';
-import { agodaScreens } from '../data/agodaFields.js';
+import { platforms, getPlatform } from '../data/platforms.js';
 import { buildCopyCards } from '../rules/buildCopyCards.js';
-import { checkAgodaLink } from '../rules/checkAgodaLink.js';
 import { ROOM_TYPES, AMENITIES, allAmenities } from '../data/options.js';
 import { suggestPrice } from '../rules/suggestPrice.js';
 
 export const HEAD = {
   chat: ['line'], review: ['line'], live: ['line'],
   form: ['liff', 'กรอกข้อมูลบ้านพัก'], writing: ['liff', 'AI กำลังเขียน'], preview: ['liff', 'ดูตัวอย่างประกาศ'],
-  connections: ['liff', 'การเชื่อมต่อ'], coach: ['liff', 'สมัคร Agoda'],
+  connections: ['liff', 'การเชื่อมต่อ'], coach: ['liff', 'สมัครช่องทาง'],
 };
 export const isChat = st => HEAD[st][0] === 'line';
-const canBack = () => state.step !== 'writing' && (state.hist.length > 0 || (state.step === 'coach' && state.coachStep > 1));
+const canBack = () => state.step !== 'writing' && (state.hist.length > 0 || (state.step === 'coach' && conn().step > 1));
 
 export function headerHtml() {
   const back = `<button class="hb" data-a="back" aria-label="ย้อนกลับ" ${canBack() ? '' : 'disabled'}><i class="chev"></i></button>`;
   if (isChat(state.step)) return `${back}<div class="hn"><b>เปิดบ้าน</b><small>✔ บัญชีทางการ</small></div><span class="hi" aria-hidden="true">⌕ ✆ ☰</span>`;
-  return `${back}<b class="ht">${HEAD[state.step][1]}</b><button class="hb" data-a="close" aria-label="ปิดและกลับไปที่แชท">✕</button>`;
+  const title = state.step === 'coach' ? `สมัคร ${esc(getPlatform(state.active).short || getPlatform(state.active).name)}` : HEAD[state.step][1];
+  return `${back}<b class="ht">${title}</b><button class="hb" data-a="close" aria-label="ปิดและกลับไปที่แชท">✕</button>`;
 }
 
 // ---- LINE chat ----
@@ -33,9 +33,11 @@ function chatHtml() {
   if (s.started) h += me('เริ่มเลย') + bot('ยินดีค่ะ กรอกข้อมูลบ้านพักไม่กี่ข้อ แล้ว AI จะเขียนประกาศให้');
   if (s.draft) h += me('ให้ AI เขียนประกาศ') + bot('ได้รับข้อมูลแล้วค่ะ AI เขียนประกาศให้เรียบร้อยแล้ว');
   if (s.previewSent) h += fx(`ตัวอย่างประกาศของ ${esc(s.intake.name)} พร้อมแล้ว`, 'ดูตัวอย่าง', 'preview');
-  if (s.approved) h += me('อนุมัติ') + fx('ขอบคุณค่ะ ต่อไปเชื่อมต่อกับ Agoda เพื่อให้ประกาศขึ้นจริง', 'ไปที่หน้าการเชื่อมต่อ', 'connections');
-  if (s.linkSent) h += me(esc(s.link)) + bot('ได้รับลิงก์แล้วค่ะ รอ Agoda อนุมัติ');
-  if (s.step === 'live') h += bot(`🎉 ประกาศของ ${esc(s.intake.name)} ขึ้น Agoda แล้ว พร้อมรับแขกค่ะ`);
+  if (s.approved) h += me('อนุมัติ') + fx('ขอบคุณค่ะ ต่อไปเชื่อมต่อช่องทางเพื่อให้ประกาศขึ้นจริง', 'ไปที่หน้าการเชื่อมต่อ', 'connections');
+  platforms.forEach(p => { const c = conn(p.id); if (c.linkSent && !c.live) h += me(esc(c.link)) + bot(p.link.wait); });
+  platforms.forEach(p => { if (conn(p.id).live) h += bot(p.liveMsg(esc(s.intake.name))); });
+  const pending = s.approved ? platforms.filter(p => !conn(p.id).live) : [];
+  if (platforms.some(p => conn(p.id).live) && pending.length) h += fx(`เพิ่มช่องทาง ${esc(pending[0].short || pending[0].name)} ได้อีกนะคะ`, 'เพิ่มการเชื่อมต่อ', 'connections');
   if (!s.draft) h += `<div class="chips"><button data-a="go" data-v="form">${s.started ? 'กรอกข้อมูลต่อ' : 'เริ่มเลย'}</button></div>`;
   return h;
 }
@@ -64,24 +66,44 @@ export function screenHtml() {
         + `<h3>${esc(d['title_' + L])}</h3><p>${esc(d['desc_' + L])}</p>${previewExtra(i)}<p class="muted">ราคาที่แนะนำ ${p.value} บาท/คืน (ช่วง ${p.low}–${p.high}) · ${esc(i.contact.phone)}</p>`
         + (s.approved ? `<p class="ok">✓ คุณอนุมัติแล้ว</p>` : '');
     }
-    case 'connections': return `<div class="card"><b>Agoda</b><small>ยังไม่ได้เชื่อมต่อ · เจ้าหน้าที่จะพาทำทีละขั้น</small></div>`;
+    case 'connections': return connectionsHtml();
     case 'coach': return coachHtml();
   }
 }
 
+// ---- Connections: one card per platform, rendered from platforms.js ----
+function connStatus(p) {
+  const c = conn(p.id), n = p.screens.length;
+  if (c.live) return { cls: 'ok', text: '✓ เชื่อมต่อแล้ว · ขึ้นจริง' };
+  if (c.linkSent) return { cls: 'muted', text: p.link.wait };
+  if (c.step > 1 || c.coach) return { cls: 'muted', text: `กำลังเชื่อมต่อ · ขั้นที่ ${Math.min(c.step, n)}/${n}` };
+  return { cls: 'muted', text: 'ยังไม่ได้เชื่อมต่อ · เจ้าหน้าที่จะพาทำทีละขั้น' };
+}
+function connectionsHtml() {
+  return platforms.map(p => {
+    const c = conn(p.id), st = connStatus(p), going = c.step > 1 || c.coach || c.linkSent;
+    const action = c.live ? '' : btn(going ? 'ทำต่อ' : 'เชื่อมต่อ', 'connect', p.id, false, going ? '' : 'ghost');
+    return `<div class="agoda"><small>${esc(p.role)}</small><b>${esc(p.short || p.name)}</b>`
+      + `<p class="muted">${esc(p.blurb)}</p>`
+      + (p.needs && !c.live ? `<p class="note">${esc(p.needs)}</p>` : '')
+      + `<p class="${st.cls}">${esc(st.text)}</p>${action}</div>`;
+  }).join('');
+}
+
 function coachHtml() {
-  const s = state;
-  if (s.coachStep === 5) {
-    const ck = s.link ? checkAgodaLink(s.link) : null;
-    return `<p>สมัครเสร็จแล้ว วางลิงก์หน้าที่พักของคุณบน Agoda</p><label for="f-link">ลิงก์ Agoda</label><input id="f-link" data-link placeholder="https://www.agoda.com/…" value="${esc(s.link)}">`
-      + `<p id="link-msg" class="${ck ? (ck.ok ? 'ok' : 'err') : ''}">${ck ? ck.msg : ''}</p>` + (s.linkSent ? `<p class="ok">✓ ส่งลิงก์แล้ว รอ Agoda อนุมัติ</p>` : '');
+  const s = state, p = getPlatform(s.active), c = conn(), n = p.screens.length;
+  if (c.step === n + 1) {
+    const lk = p.link, ck = c.link ? lk.check(c.link) : null;
+    return `<p>${esc(lk.title)}</p><label for="f-link">${esc(lk.label)}</label><input id="f-link" data-link placeholder="${esc(lk.placeholder)}" value="${esc(c.link)}">`
+      + `<p id="link-msg" class="${ck ? (ck.ok ? 'ok' : 'err') : ''}">${ck ? ck.msg : ''}</p>` + (c.linkSent ? `<p class="ok">${esc(lk.sent)}</p>` : '');
   }
-  const sc = agodaScreens[s.coachStep - 1], cards = buildCopyCards(s.draft, s.intake);
-  const hl = s.coach && s.coach.screen_id === sc.screen ? s.coach.highlight : '';
-  return `<div class="agoda"><small>Agoda · ขั้นที่ ${s.coachStep}/4</small><b>${sc.agoda}</b><i></i><i></i></div><p><b>${sc.title}</b> แตะการ์ดเพื่อคัดลอก</p>`
-    + cards.map((c, n) => c.screen !== sc.screen ? '' : `<button class="card ${c.label === hl ? 'hl' : ''}" data-a="copy" data-v="${n}"><small>${esc(c.label)}${c.hintOnly ? ' · คำแนะนำ' : ''}</small>${esc(c.value)}</button>`).join('')
-    + (s.coachStep === 4 ? `<label for="f-shot">ติดขัด? ส่งภาพหน้าจอ Agoda ให้ AI อธิบาย</label><input id="f-shot" type="file" accept="image/*" data-shot>` : '')
-    + (s.coach ? `<p class="note">${esc(s.coach.explain_th)}</p>` : '');
+  const sc = p.screens[c.step - 1], cards = buildCopyCards(s.draft, s.intake, s.active);
+  const hl = c.coach && c.coach.screen_id === sc.screen ? c.coach.highlight : '';
+  return `<div class="agoda"><small>${esc(p.short || p.name)} · ขั้นที่ ${c.step}/${n}</small><b>${esc(sc.field)}</b><i></i><i></i></div><p><b>${esc(sc.title)}</b> แตะการ์ดเพื่อคัดลอก</p>`
+    + (c.step === 1 && p.needs ? `<p class="note">${esc(p.needs)}</p>` : '')
+    + cards.map((cd, idx) => cd.screen !== sc.screen ? '' : `<button class="card ${cd.label === hl ? 'hl' : ''}" data-a="copy" data-v="${idx}"><small>${esc(cd.label)}${cd.hintOnly ? ' · คำแนะนำ' : ''}</small>${esc(cd.value)}</button>`).join('')
+    + (c.step === n ? `<label for="f-shot">ติดขัด? ส่งภาพหน้าจอ ${esc(p.short || p.name)} ให้ AI อธิบาย</label><input id="f-shot" type="file" accept="image/*" data-shot>` : '')
+    + (c.coach ? `<p class="note">${esc(c.coach.explain_th)}</p>` : '');
 }
 
 export function dockHtml() {
@@ -90,8 +112,11 @@ export function dockHtml() {
   switch (s.step) {
     case 'form': return btn('ให้ AI เขียนประกาศ', 'write', '', !formValid()) + btn('ใช้บ้านตัวอย่าง', 'loadDemo', '', false, 'ghost');
     case 'preview': return s.approved ? btn('กลับไปที่แชท', 'close') : btn('อนุมัติ', 'approveOwner');
-    case 'connections': return btn('เพิ่มการเชื่อมต่อ', 'go', 'coach');
-    case 'coach': return s.coachStep < 5 ? btn('ถัดไป', 'nextCoach') : btn('ส่งลิงก์', 'sendLink', '', !checkAgodaLink(s.link).ok || s.linkSent);
+    case 'connections': return '';
+    case 'coach': {
+      const p = getPlatform(s.active), c = conn(), n = p.screens.length;
+      return c.step <= n ? btn('ถัดไป', 'nextCoach') : btn('ส่งลิงก์', 'sendLink', '', !p.link.check(c.link).ok || c.linkSent);
+    }
     default: return '';
   }
 }

@@ -1,5 +1,5 @@
 // Everything the owner, the staff console and the presenter toolbar can do.
-import { state, emit, resetState, clone } from './state.js';
+import { state, emit, resetState, clone, conn } from './state.js';
 import { config } from './config.js';
 import { demoHomestay } from './data/demoHomestay.js';
 import { savedDraft } from './data/savedDraft.js';
@@ -7,7 +7,7 @@ import { generateDraft } from './ai/draft.js';
 import { coachScreenshot } from './ai/coach.js';
 import { askJson, ping } from './ai/ollama.js';
 import { buildCopyCards } from './rules/buildCopyCards.js';
-import { checkAgodaLink } from './rules/checkAgodaLink.js';
+import { getPlatform, platforms } from './data/platforms.js';
 import { toast } from './ui/dom.js';
 
 let ctl = null;
@@ -23,7 +23,7 @@ export const actions = {
   go,
   back() {
     if (state.step === 'writing') return;
-    if (state.step === 'coach' && state.coachStep > 1) { state.coachStep--; state.coach = null; return emit(); }
+    if (state.step === 'coach' && conn().step > 1) { conn().step--; conn().coach = null; return emit(); }
     const p = state.hist.pop(); if (p) { state.step = p; emit(); }
   },
   close: () => go('chat'),
@@ -33,7 +33,7 @@ export const actions = {
     if (i == 0) go('form');
     else if (i == 1) s.previewSent ? go('preview') : toast('ยังไม่มีตัวอย่าง กรอกข้อมูลให้ AI เขียนประกาศก่อนนะคะ');
     else if (i == 2) s.approved ? go('connections') : toast('อนุมัติตัวอย่างประกาศก่อนนะคะ');
-    else if (i == 3) { if (!s.approved) return toast('อนุมัติตัวอย่างประกาศก่อนนะคะ'); s.coachStep = 4; s.coach = null; go('coach'); }
+    else if (i == 3) { if (!s.approved) return toast('อนุมัติตัวอย่างประกาศก่อนนะคะ'); s.active = 'agoda'; const c = conn('agoda'); c.step = getPlatform('agoda').screens.length; c.coach = null; go('coach'); }
     else if (i == 4) toast('แตะ "กรอกข้อมูล" เพื่อเริ่ม หรือพิมพ์ถามเจ้าหน้าที่ได้เลย');
     else toast('เจ้าหน้าที่ตอบทุกวัน 9:00–18:00');
   },
@@ -74,26 +74,32 @@ export const actions = {
     Object.assign(state, { draft: r.draft, source: r.source, busy: false, previewSent: true, step: 'preview' }); emit();
   },
   approveOwner() { state.approved = true; go('chat'); },
-  nextCoach() { state.coachStep = Math.min(5, state.coachStep + 1); state.coach = null; emit(); },
+  // Start (or resume) connecting a platform from the Connections page.
+  connect(id) { const c = conn(id); if (c.live) return toast('เชื่อมต่อแล้ว'); state.active = id; go('coach'); },
+  nextCoach() { const c = conn(), n = getPlatform(state.active).screens.length; c.step = Math.min(n + 1, c.step + 1); c.coach = null; emit(); },
   copy(i) {
-    const c = buildCopyCards(state.draft, state.intake)[+i];
+    const c = buildCopyCards(state.draft, state.intake, state.active)[+i];
     try { navigator.clipboard.writeText(c.value); } catch { /* clipboard blocked */ }
     toast('คัดลอกแล้ว');
   },
   async screenshot(file) {
     const b64 = await new Promise(r => { const f = new FileReader(); f.onload = () => r(String(f.result).split(',')[1]); f.readAsDataURL(file); });
-    state.coach = await coachScreenshot({ base64: b64, fileName: file.name }, buildCopyCards(state.draft, state.intake), state.coachStep, state.mode);
+    conn().coach = await coachScreenshot({ base64: b64, fileName: file.name }, buildCopyCards(state.draft, state.intake, state.active), conn().step, state.mode, state.active);
     emit();
   },
-  sendLink() { if (checkAgodaLink(state.link).ok) { state.linkSent = true; emit(); toast('ส่งลิงก์ให้เจ้าหน้าที่แล้ว'); } },
-  simulateAgoda() { if (state.linkSent) go('live'); else toast('ยังไม่มีลิงก์ Agoda จากเจ้าของ'); },
+  sendLink() { const c = conn(); if (getPlatform(state.active).link.check(c.link).ok) { c.linkSent = true; emit(); toast('ส่งลิงก์ให้เจ้าหน้าที่แล้ว'); } },
+  // Staff console: simulate the active platform's approval/verification going through.
+  simulateAgoda() { const c = conn(); if (c.linkSent) { c.live = true; go('live'); } else toast('ยังไม่มีลิงก์จากเจ้าของ'); },
   jump(step) {
     const J = ['chat', 'form', 'review', 'preview', 'connections', 'coach', 'live'], n = J.indexOf(step);
     if (!state.intake.name) state.intake = clone(demoHomestay);
     if (n < 2) state.draft = null;
     else if (!state.draft) { state.draft = clone(savedDraft); state.source = 'Saved (cached)'; }
-    Object.assign(state, { hist: J.slice(0, n), started: n >= 1, previewSent: n >= 2, approved: n >= 4, coachStep: 1, coach: null, lang: 'th', linkSent: step === 'live', step });
-    if (step === 'live') state.link = 'https://www.agoda.com/baan-suan-rim-nan/hotel/nan-th.html';
+    state.active = 'agoda';
+    platforms.forEach(p => Object.assign(state.conns[p.id], { step: 1, coach: null, link: '', linkSent: false, live: false }));
+    const a = state.conns.agoda;
+    if (step === 'live') Object.assign(a, { link: getPlatform('agoda').sample, linkSent: true, live: true });
+    Object.assign(state, { hist: J.slice(0, n), started: n >= 1, previewSent: n >= 2, approved: n >= 4, lang: 'th', step });
     emit();
   },
 };
