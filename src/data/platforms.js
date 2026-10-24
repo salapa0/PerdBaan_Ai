@@ -42,7 +42,7 @@ export const platforms = [
       wait: 'ได้รับลิงก์แล้วค่ะ รอ Agoda อนุมัติ',
       check: url => ({ ok: agodaOk(url), msg: agodaOk(url) ? 'ลิงก์ถูกต้อง' : 'ต้องเป็นลิงก์หน้าที่พักบน agoda.com' }),
     },
-    liveMsg: name => `🎉 ประกาศของ ${name} ขึ้น Agoda แล้ว รับการจองได้เลยค่ะ`,
+    liveMsg: name => `ประกาศของ ${name} ขึ้น Agoda แล้ว รับการจองได้เลยค่ะ`,
     sample: 'https://www.agoda.com/baan-suan-rim-nan/hotel/nan-th.html',
   },
   {
@@ -70,7 +70,7 @@ export const platforms = [
       c.push({ screen: 'address', label: 'หมุดแผนที่', value: 'ลากหมุดให้ตรงทางเข้าบ้านพัก แขกใช้นำทาง', hintOnly: true });
       c.push({ screen: 'contact', label: 'เบอร์โทร', value: intake.contact.phone });
       c.push({ screen: 'hours', label: 'เวลาเปิด–ปิด (เช็คอิน/เอาท์)', value: 'เช็คอิน 14:00 · เช็คเอาท์ 11:00 (ปรับได้)', hintOnly: true });
-      c.push({ screen: 'photos', label: 'รูปภาพ', value: 'อัปโหลดรูปชุดเดียวกับที่ใช้บน Agoda อย่างน้อย 5 รูป', hintOnly: true });
+      c.push({ screen: 'photos', label: 'รูปภาพ', value: 'อัปโหลดรูปบ้านพักอย่างน้อย 5 รูป', hintOnly: true });
       return c;
     },
     link: {
@@ -80,7 +80,7 @@ export const platforms = [
       wait: 'ได้รับลิงก์แล้วค่ะ รอ Google ยืนยันตัวตน',
       check: url => ({ ok: googleOk(url), msg: googleOk(url) ? 'ลิงก์ถูกต้อง' : 'ต้องเป็นลิงก์ Google Maps หรือโปรไฟล์ธุรกิจ (maps.app.goo.gl, g.page, google.com/maps)' }),
     },
-    liveMsg: name => `🎉 ${name} ขึ้นบน Google Maps แล้ว ค้นเจอและรับรีวิวได้เลยค่ะ`,
+    liveMsg: name => `${name} ขึ้นบน Google Maps แล้ว ค้นเจอและรับรีวิวได้เลยค่ะ`,
     sample: 'https://maps.app.goo.gl/baan-suan-rim-nan',
   },
 ];

@@ -8,7 +8,7 @@ import { suggestPrice } from '../rules/suggestPrice.js';
 
 export const HEAD = {
   chat: ['line'], review: ['line'], live: ['line'],
-  form: ['liff', 'กรอกข้อมูลบ้านพัก'], writing: ['liff', 'AI กำลังเขียน'], preview: ['liff', 'ดูตัวอย่างประกาศ'],
+  form: ['liff', 'กรอกข้อมูลบ้านพัก'], writing: ['liff', 'AI กำลังเขียน'], preview: ['liff', 'สรุปรายละเอียด'],
   connections: ['liff', 'การเชื่อมต่อ'], coach: ['liff', 'สมัครช่องทาง'],
 };
 export const isChat = st => HEAD[st][0] === 'line';
@@ -29,7 +29,7 @@ const fx = (txt, label, v) => `<div class="row"><span class="av">เ</span><div 
 
 function chatHtml() {
   const s = state; let h = '<div class="date">วันนี้</div>';
-  h += bot('สวัสดีค่ะ 👋 เปิดบ้านช่วยให้บ้านพักของคุณขึ้น Agoda ได้ ตอบไม่กี่ข้อ แล้ว AI เขียนประกาศให้ ไม่เก็บค่าคอมมิชชัน');
+  h += bot('สวัสดีค่ะ เปิดบ้านช่วยให้บ้านพักของคุณขึ้นแพลตฟอร์มท่องเที่ยวได้ ตอบไม่กี่ข้อ แล้ว AI เขียนประกาศให้ ไม่เก็บค่าคอมมิชชัน');
   if (s.started) h += me('เริ่มเลย') + bot('ยินดีค่ะ กรอกข้อมูลบ้านพักไม่กี่ข้อ แล้ว AI จะเขียนประกาศให้');
   if (s.draft) h += me('ให้ AI เขียนประกาศ') + bot('ได้รับข้อมูลแล้วค่ะ AI เขียนประกาศให้เรียบร้อยแล้ว');
   if (s.previewSent) h += fx(`ตัวอย่างประกาศของ ${esc(s.intake.name)} พร้อมแล้ว`, 'ดูตัวอย่าง', 'preview');
@@ -43,7 +43,7 @@ function chatHtml() {
 }
 
 // ---- rich menu grid (bottom of the chat) ----
-const TILES = [['📝', 'กรอกข้อมูล'], ['👀', 'ดูตัวอย่าง'], ['🔗', 'การเชื่อมต่อ'], ['📷', 'ถามเรื่อง Agoda'], ['❓', 'ช่วยเหลือ'], ['📞', 'คุยกับเจ้าหน้าที่']];
+const TILES = [['📝', 'กรอกข้อมูล'], ['👀', 'ดูตัวอย่าง'], ['🔗', 'การเชื่อมต่อ'], ['📷', 'ถามเรื่องการสมัคร'], ['❓', 'ช่วยเหลือ'], ['📞', 'ติดต่อกับเจ้าหน้าที่']];
 function menuHtml() {
   const s = state, on = [true, s.previewSent, s.approved, s.approved, true, true];
   return `<button class="menubar" data-a="toggleMenu" aria-expanded="${s.menuOpen}"><span>เมนู</span><i class="chev ${s.menuOpen ? 'dn' : 'up'}"></i></button>`
@@ -68,7 +68,7 @@ export function screenHtml() {
         + `<div class="listing-body">`
         + `<div class="price-badge"><b>${p.value}</b><span class="unit">บาท/คืน</span><span class="rng">ช่วง ${p.low}–${p.high}</span></div>`
         + `<p>${esc(d['desc_' + L])}</p>${previewExtra(i)}`
-        + `<p class="muted fine">💡 ราคาที่ AI แนะนำจากข้อมูลของคุณ · ติดต่อ ${esc(i.contact.phone)}</p>`
+        + `<p class="muted fine">ราคาที่ AI แนะนำจากข้อมูลของคุณ · ติดต่อ ${esc(i.contact.phone)}</p>`
         + `</div></article>`
         + (s.approved ? `<p class="ok center">✓ คุณอนุมัติประกาศนี้แล้ว</p>` : '');
     }
