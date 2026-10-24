@@ -1,5 +1,5 @@
-// Shared data shapes. Owner: C (content and data). Change only after telling the team.
-// Updated 24 Oct to match the shapes the prototype code actually uses
+// Shared data shapes. Update this file whenever a format changes.
+// Matches the shapes the prototype code uses
 // (flat per-language fields like title_th, rich room objects, contact as an object).
 
 /**

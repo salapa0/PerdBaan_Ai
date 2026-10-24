@@ -1,13 +1,9 @@
-# public: files the page shows
+# public: files the app loads
 
-**What goes here:** images and fonts that appear in the running app. The page loads these directly.
-**Who:** A for fonts, C for demo photos.
-**Not here:** code (`src/`), working screenshots and slides (`content/`) or notes (`docs/`).
-
-| Subfolder | What it holds |
+| Folder | What it holds |
 | --- | --- |
-| `fonts/` | The Noto Sans Thai font files, so Thai text looks right offline |
+| `fonts/` | Noto Sans Thai, bundled so Thai looks right offline |
 | `demo-photos/` | Photos of the demo homestay |
-| `agoda/` | Agoda sign-up screens shown in the coach (`agoda-01.png`…`agoda-08.png`) + `agoda-live.png` |
+| `agoda/` | Agoda sign-up screens shown in the coach (`agoda-01` … `agoda-08`) and the offline live-listing page |
 
-Keep every image small (under 500 KB) so the app stays fast and the repo stays light.
+Keep every image under 500 KB.

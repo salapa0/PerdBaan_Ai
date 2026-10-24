@@ -1,10 +1,11 @@
 // Routing: which screen renders for the current stage, and the button-action table.
 import { getState, setState } from './state.js';
 import { botSay, botSayNow } from './ui/chat.js';
-import { TEXT, toast } from './ui/ui.js';
+import { TEXT, toast, h, icon, logo } from './ui/ui.js';
+import { CONFIG } from './config.js';
 
 import { chatHome, buildDock } from './screens/chatHome.js';
-import { intakeScreen } from './screens/intake.js';
+import { intakeScreen, saveIntakeWork } from './screens/intake.js';
 import { generatingScreen } from './screens/generating.js';
 import { previewScreen } from './screens/preview.js';
 import { connectionsScreen } from './screens/connections.js';
@@ -22,24 +23,67 @@ const screens = {
   coach: coachScreen,
 };
 
+const CHAT_STAGES = ['chat', 'review', 'waiting', 'live'];
+// LIFF (LINE mini-app) pages open on top of the chat with their own header, like the real LINE app.
+const LIFF_TITLES = { intake: 'ลงประกาศที่พัก', generating: 'ลงประกาศที่พัก', preview: 'ตัวอย่างประกาศ', connections: 'การเชื่อมต่อ', coach: 'เชื่อมต่อ Agoda' };
+
+function closeLiff() {
+  const s = getState();
+  if (s.stage === 'intake') saveIntakeWork();
+  setState({ stage: s.draft && s.stage !== 'intake' ? (s.agoda.status === 'live' ? 'live' : 'review') : 'chat' });
+}
+
+function renderLineHeader(el) {
+  if (el.dataset.ready) return;
+  el.dataset.ready = '1';
+  el.replaceChildren(
+    h('button', { class: 'lh-back', 'aria-label': 'back' }, icon('back', 26)),
+    logo(32),
+    h('div', { class: 'lh-name' }, CONFIG.product, h('span', { class: 'lh-verified', title: 'Official account' }, icon('check', 11))),
+    h('div', { class: 'lh-icons' },
+      h('button', { class: 'icon-btn', 'aria-label': 'search' }, icon('search', 21)),
+      h('button', { class: 'icon-btn', 'aria-label': 'call' }, icon('phone', 20)),
+      h('button', { class: 'icon-btn', 'aria-label': 'menu' }, icon('menu', 22)),
+    ),
+  );
+}
+
+function renderLiffHeader(el, stage) {
+  el.replaceChildren(
+    stage === 'generating' ? h('span') : h('button', { class: 'icon-btn', 'aria-label': 'close', on: { click: closeLiff } }, icon('close', 22)),
+    h('div', { class: 'lf-title' },
+      h('div', { class: 'lf-name' }, LIFF_TITLES[stage] || CONFIG.product),
+      h('div', { class: 'lf-domain' }, icon('lock', 11), 'poetbaan.app')),
+    h('span'),
+  );
+}
+
 export function renderPhone() {
   const mount = document.getElementById('screen');
   if (!mount) return;
   const state = getState();
-  const fn = screens[state.stage] || chatHome;
-  const node = fn(state);
-  mount.replaceChildren(node);
+  const isChat = CHAT_STAGES.includes(state.stage);
 
-  // dock: rich menu on chat-family stages, hidden otherwise
+  const lineHeader = document.getElementById('line-header');
+  const liffHeader = document.getElementById('liff-header');
+  if (lineHeader && liffHeader) {
+    lineHeader.hidden = !isChat;
+    liffHeader.hidden = isChat;
+    if (isChat) renderLineHeader(lineHeader); else renderLiffHeader(liffHeader, state.stage);
+  }
+  mount.classList.toggle('liff', !isChat);
+
+  const fn = screens[state.stage] || chatHome;
+  mount.replaceChildren(fn(state));
+
+  // dock: LINE rich menu / keyboard on chat stages; a plain safe-area strip under LIFF pages
   const dock = document.getElementById('dock');
-  const isChat = ['chat', 'review', 'waiting', 'live'].includes(state.stage);
   if (dock) {
-    if (isChat) dock.replaceChildren(buildDock(state));
-    else dock.replaceChildren();
+    dock.className = isChat ? 'dock' : 'dock safe';
+    if (isChat) dock.replaceChildren(buildDock(state)); else dock.replaceChildren();
   }
 
   if (isChat) requestAnimationFrame(() => { mount.scrollTop = mount.scrollHeight; });
-  else mount.scrollTop = 0;
 }
 
 export function go(stage) {
@@ -71,7 +115,7 @@ export function doAction(action, payload = null) {
       if (url && navigator.onLine) { window.open(url, '_blank'); }
       else {
         // offline stand-in: open the saved live page image in the viewer
-        import('./screens/coach.js').then(m => m.openImageViewer('public/agoda/agoda-live.png', 'ตัวอย่างหน้าประกาศบน Agoda (ภาพจำลองออฟไลน์)'));
+        import('./screens/coach.js').then(m => m.openImageViewer(`public/agoda/agoda-live.${CONFIG.agodaScreenExt}`, 'ตัวอย่างหน้าประกาศบน Agoda (ภาพจำลองออฟไลน์)'));
       }
       break;
     }

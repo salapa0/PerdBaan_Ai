@@ -51,3 +51,17 @@ export function toBase64(blob) {
     fr.readAsDataURL(blob);
   });
 }
+
+// Always redraw onto a canvas (handles SVG, which the vision model can't read) → PNG blob, max width maxW.
+export async function rasterize(blob, maxW = 1280) {
+  const img = await loadImage(blob);
+  const w0 = img.naturalWidth || img.width || maxW;
+  const h0 = img.naturalHeight || img.height || Math.round(maxW * 1.6);
+  const scale = Math.min(1, maxW / w0) || 1;
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(w0 * scale); canvas.height = Math.round(h0 * scale);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return new Promise(resolve => canvas.toBlob(b => resolve(b), 'image/png'));
+}

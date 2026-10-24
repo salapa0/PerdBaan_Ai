@@ -86,6 +86,7 @@ function showToolbar(show) {
   if (!toolbarEl) return;
   toolbarEl.hidden = !show;
   document.body.classList.toggle('has-toolbar', show);
+  import('./app.js').then(m => m.fitDevice && m.fitDevice());
 }
 
 export function registerShortcuts() {

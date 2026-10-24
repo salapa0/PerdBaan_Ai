@@ -1,4 +1,3 @@
 # public/fonts
 
-**What goes here:** the Noto Sans Thai font files, saved here so Thai text works with no internet at the demo venue.
-**Who:** A (frontend).
+Noto Sans Thai (regular, medium, bold; Thai and Latin) as `.woff2`, loaded by `src/ui/app.css`. Bundled so Thai text is sharp and works with no internet. Licence: SIL Open Font License (`OFL-LICENSE.txt`).

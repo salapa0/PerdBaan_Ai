@@ -1,8 +1,6 @@
 // Central config. Edit MODEL TAGS to match what you pulled with `ollama pull`.
 export const CONFIG = {
   product: 'เปิดบ้าน',            // Poet Baan
-  botName: 'ผู้ช่วยลงประกาศ',
-  botAvatar: 'ปบ',
 
   ollama: {
     host: 'http://localhost:11434',
@@ -12,6 +10,10 @@ export const CONFIG = {
     keepAlive: '30m',
     timeouts: { listing: 120000, translate: 60000, coach: 25000, rewrite: 40000, ping: 2500 },
   },
+
+  // Agoda sign-up screens shown in the coach live in public/agoda/agoda-01..08.<ext>.
+  // 'svg' = the bundled simulation mockups. Switch to 'png' after you drop in real captured screenshots.
+  agodaScreenExt: 'svg',
 
   // Timing / behaviour
   savedProgressMs: 3000,   // fake-but-honest progress when running in saved mode

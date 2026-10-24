@@ -22,9 +22,8 @@ function futureRow(name) {
 export function connectionsScreen(state) {
   const ag = state.agoda;
   const stepLine = ag.status === 'connecting' ? h('div', { class: 'cc-meta' }, TEXT.coach.step(ag.step)) : null;
-  return h('div', { class: 'conn' },
-    h('h3', {}, TEXT.conn.title),
-    h('div', { class: 'sub' }, TEXT.conn.sub),
+  return h('div', { class: 'page' }, h('div', { class: 'page-body page-grey' },
+    h('p', { class: 'conn-sub' }, TEXT.conn.sub),
     h('div', { class: 'conn-card' },
       h('div', { class: 'cc-top' },
         h('span', { class: 'cc-logo' }, 'Agoda'),
@@ -39,5 +38,5 @@ export function connectionsScreen(state) {
     futureRow('Booking.com'),
     futureRow('Trip.com'),
     futureRow('Google Maps'),
-  );
+  ));
 }

@@ -1,5 +1,5 @@
 // S4 — Thai (and EN/ZH) preview of the listing + approve / request change.
-import { h, money, toast, TEXT } from '../ui/ui.js';
+import { h, money, toast, icon, TEXT } from '../ui/ui.js';
 import { getState, setState } from '../state.js';
 import { botSay } from '../ui/chat.js';
 import { photoURL } from '../photos.js';
@@ -23,8 +23,8 @@ function carousel(intake) {
   paint();
   return h('div', { class: 'carousel' },
     img,
-    photos.length > 1 ? h('button', { class: 'nav l', on: { click: () => go(-1) } }, '‹') : null,
-    photos.length > 1 ? h('button', { class: 'nav r', on: { click: () => go(1) } }, '›') : null,
+    photos.length > 1 ? h('button', { class: 'nav l', 'aria-label': 'previous', on: { click: () => go(-1) } }, icon('back', 20)) : null,
+    photos.length > 1 ? h('button', { class: 'nav r', 'aria-label': 'next', on: { click: () => go(1) } }, icon('chevronRight', 20)) : null,
     dots,
   );
 }
@@ -38,7 +38,8 @@ function requestChangeSheet(onClose) {
   }));
   const ta = h('textarea', { maxlength: 100, placeholder: 'บอกสิ่งที่อยากแก้ เช่น อยากให้เน้นว่าเงียบสงบ' });
   const sheet = h('div', { class: 'sheet' },
-    h('div', { class: 'sheet-head' }, h('span', { class: 's-title' }, TEXT.preview.reqTitle), h('button', { class: 'x', on: { click: onClose } }, '✕')),
+    h('div', { class: 'sheet-grab' }),
+    h('div', { class: 'sheet-head' }, h('span', { class: 's-title' }, TEXT.preview.reqTitle), h('button', { class: 'icon-btn', 'aria-label': 'close', on: { click: () => onClose() } }, icon('close', 20))),
     h('div', { class: 'sheet-body' }, h('div', { class: 'field' }, chips), h('div', { class: 'field' }, ta)),
     h('div', { class: 'sheet-foot' }, h('button', { class: 'btn primary block', on: { click: () => onClose(picked, ta.value) } }, TEXT.preview.reqSend)),
   );
@@ -48,7 +49,7 @@ function requestChangeSheet(onClose) {
 export function previewScreen(state) {
   const d = state.draft;
   const i = state.intake;
-  if (!d) return h('div', { class: 'pv' }, h('div', { style: 'padding:30px;text-align:center;color:#888' }, 'ยังไม่มีร่างประกาศ'));
+  if (!d) return h('div', { class: 'page' }, h('div', { class: 'page-body', style: 'text-align:center;color:#888;padding-top:40px' }, 'ยังไม่มีร่างประกาศ'));
   const lang = state.review.activeLang || 'th';
   const rounds = state.review.changeRounds || 0;
   const modalRoot = document.getElementById('modal-root');
@@ -96,7 +97,8 @@ export function previewScreen(state) {
   const facs = (i.answers.facilities || []).map(f => h('span', { class: 'pv-fac' }, thLabel('fac', f)));
   const hlChips = (d.highlights || []).map(hl => h('span', { class: 'chip on', style: 'cursor:default' }, lang === 'th' ? hl.th : lang === 'en' ? hl.en : (hl.zh || hl.en)));
 
-  return h('div', { class: 'pv' },
+  return h('div', { class: 'page' + (lang === 'zh' ? ' zh' : '') },
+   h('div', { class: 'page-body', style: 'padding:0' },
     h('div', { class: 'pv-note' }, TEXT.preview.note),
     langSwitch,
     carousel(i),
@@ -114,7 +116,8 @@ export function previewScreen(state) {
       h('div', { class: 'pv-sec-t' }, TEXT.preview.rules),
       h('div', { class: 'pv-rules' }, `เช็คอิน ${i.answers.checkin} · เช็คเอาท์ ${i.answers.checkout} · สูบบุหรี่: ${i.answers.smoking ? 'ได้' : 'ไม่ได้'} · สัตว์เลี้ยง: ${i.answers.pets ? 'ได้' : 'ไม่ได้'}`),
     ),
-    h('div', { class: 'pv-foot' },
+   ),
+    h('div', { class: 'page-foot' },
       h('button', { class: 'btn ghost', disabled: rounds >= 2, on: { click: openRequestChange } }, rounds >= 2 ? TEXT.preview.maxRounds : TEXT.preview.requestChange),
       h('button', { class: 'btn primary', on: { click: approve } }, TEXT.preview.approve),
     ),

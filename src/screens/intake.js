@@ -1,5 +1,5 @@
 // S2 — intake form, 3 steps (place+rooms, photos, questions+contact).
-import { h, chip, stepper, toast, TEXT } from '../ui/ui.js';
+import { h, chip, stepper, toast, icon, TEXT } from '../ui/ui.js';
 import { getState, setState } from '../state.js';
 import { go, newRoom } from '../router.js';
 import { ROOM_TYPES, BED_TYPES, FACILITIES, MEALS, NEARBY, PROVINCES, thLabel } from '../data/options.js';
@@ -50,7 +50,7 @@ function roomCard(room, idx, rerender) {
       });
     }));
   return h('div', { class: 'roomcard' },
-    (getState().intake && work.rooms.length > 1) ? h('button', { class: 'rm-del', title: 'ลบ', on: { click: () => { work.rooms.splice(idx, 1); rerender(); } } }, '🗑') : null,
+    (getState().intake && work.rooms.length > 1) ? h('button', { class: 'rm-del', title: 'ลบ', on: { click: () => { work.rooms.splice(idx, 1); rerender(); } } }, icon('trash', 16)) : null,
     field(TEXT.intake.roomType, typeChips),
     field(TEXT.intake.roomName, textInput(room.name, v => room.name = v)),
     h('div', { style: 'display:flex;gap:14px;flex-wrap:wrap' },
@@ -59,7 +59,7 @@ function roomCard(room, idx, rerender) {
     ),
     field(TEXT.intake.beds + ' <span class="hint">(แตะเพื่อเพิ่มจำนวน)</span>', bedChips),
     field(TEXT.intake.price, textInput(room.price, v => room.price = Number(v) || 0, { type: 'number', inputmode: 'numeric' })),
-    h('div', { style: 'display:flex;gap:14px' },
+    h('div', { class: 'row2' },
       field(TEXT.intake.bathroom, h('div', { class: 'toggle-row' },
         h('div', { class: 'seg' + (room.bathroom === 'private' ? ' on' : ''), on: { click: () => { room.bathroom = 'private'; rerender(); } } }, TEXT.intake.inRoom),
         h('div', { class: 'seg' + (room.bathroom === 'shared' ? ' on' : ''), on: { click: () => { room.bathroom = 'shared'; rerender(); } } }, TEXT.intake.shared),
@@ -88,7 +88,7 @@ function step1(rerender) {
   box.append(
     field(TEXT.intake.placeName, textInput(p.name, v => p.name = v, { maxlength: 60 })),
     field(TEXT.intake.village, textInput(p.village, v => p.village = v)),
-    h('div', { style: 'display:flex;gap:12px' },
+    h('div', { class: 'row2' },
       field(TEXT.intake.district, textInput(p.district, v => p.district = v)),
       (() => {
         const dl = h('datalist', { id: 'prov-list' }, ...PROVINCES.map(pr => h('option', { value: pr })));
@@ -112,35 +112,41 @@ function step1(rerender) {
 
 // ---------- Step 2 (photos) ----------
 const SLOTS = [
-  { slot: 'front', th: 'ด้านหน้าบ้าน', hint: 'ถ่ายตอนกลางวัน เห็นทั้งหลัง', ic: '🏠' },
-  { slot: 'bedroom', th: 'ห้องนอน', hint: 'เปิดไฟ จัดเตียงให้เรียบร้อย', ic: '🛏️' },
-  { slot: 'bathroom', th: 'ห้องน้ำ', hint: '', ic: '🚿' },
-  { slot: 'view', th: 'วิวรอบบ้าน', hint: '', ic: '🌄' },
-  { slot: 'food', th: 'อาหาร', hint: '', ic: '🍲' },
-  { slot: 'activity', th: 'กิจกรรม', hint: '', ic: '🚲' },
+  { slot: 'front', th: 'ด้านหน้าบ้าน', hint: 'ถ่ายตอนกลางวัน เห็นทั้งหลัง', ic: 'home' },
+  { slot: 'bedroom', th: 'ห้องนอน', hint: 'เปิดไฟ จัดเตียงให้เรียบร้อย', ic: 'bed' },
+  { slot: 'bathroom', th: 'ห้องน้ำ', hint: 'เช็ดให้แห้ง เปิดไฟ', ic: 'shower' },
+  { slot: 'view', th: 'วิวรอบบ้าน', hint: 'ถ่ายจุดที่สวยที่สุด', ic: 'mountain' },
+  { slot: 'food', th: 'อาหาร', hint: 'จานจริงที่เสิร์ฟแขก', ic: 'food' },
+  { slot: 'activity', th: 'กิจกรรม', hint: 'สิ่งที่แขกทำได้', ic: 'bike' },
 ];
 
-async function paintThumb(el, photoId) {
+async function paintThumb(img, photoId) {
   const url = await photoURL(photoId);
-  if (url) { el.style.backgroundImage = ''; el.classList.add('filled'); el.querySelector('img')?.remove(); el.prepend(h('img', { src: url })); }
+  if (url) img.src = url;
+}
+
+// one photo tile: empty slot (tap to add) or filled (remove / brighten)
+function photoTile(existing, label, rerender, emptyDef) {
+  if (existing) {
+    const img = h('img', { alt: '' });
+    paintThumb(img, existing.id);
+    return h('div', { class: 'slot filled' },
+      img,
+      h('button', { class: 'slot-bright', title: TEXT.intake.brighten, on: { click: async (e) => { e.stopPropagation(); await brightenPhoto(existing.id); toast('ปรับแสงแล้ว'); rerender(); } } }, icon('sun', 15), TEXT.intake.brighten),
+      h('button', { class: 'slot-x', 'aria-label': 'ลบรูป', on: { click: (e) => { e.stopPropagation(); deletePhoto(existing.id); work.photos = work.photos.filter(p => p !== existing); rerender(); } } }, icon('close', 15)),
+      h('div', { class: 'slot-label' }, label),
+    );
+  }
+  const tile = h('div', { class: 'slot' },
+    icon(emptyDef.ic, 26),
+    h('div', { class: 'slot-name' }, emptyDef.th),
+    emptyDef.hint ? h('div', { class: 'slot-hint' }, emptyDef.hint) : null);
+  tile.addEventListener('click', () => pickPhoto(emptyDef.slot, rerender));
+  return tile;
 }
 
 function slotTile(def, rerender) {
-  const existing = work.photos.find(p => p.slot === def.slot);
-  const tile = h('div', { class: 'slot' + (existing ? ' filled' : '') });
-  if (existing) {
-    tile.append(
-      h('img', { src: '' }),
-      h('button', { class: 'slot-x', on: { click: (e) => { e.stopPropagation(); deletePhoto(existing.id); work.photos = work.photos.filter(p => p !== existing); rerender(); } } }, '✕'),
-      h('button', { class: 'slot-bright', on: { click: async (e) => { e.stopPropagation(); await brightenPhoto(existing.id); toast('ปรับแสงแล้ว'); rerender(); } } }, TEXT.intake.brighten),
-      h('div', { class: 'slot-label' }, def.th),
-    );
-    paintThumb(tile, existing.id);
-  } else {
-    tile.append(h('div', { class: 'slot-ic' }, def.ic), h('div', {}, def.th), def.hint ? h('div', { style: 'font-size:10px;opacity:.8' }, def.hint) : null);
-    tile.addEventListener('click', () => pickPhoto(def.slot, rerender));
-  }
-  return tile;
+  return photoTile(work.photos.find(p => p.slot === def.slot), def.th, rerender, def);
 }
 
 async function brightenPhoto(id) {
@@ -161,7 +167,7 @@ function pickPhoto(slot, rerender) {
       const small = await resize(file, 1600);
       const id = 'up-' + Date.now() + '-' + slot;
       await putPhoto(id, small);
-      work.photos = work.photos.filter(p => p.slot !== slot);
+      if (slot !== 'extra') work.photos = work.photos.filter(p => p.slot !== slot);
       work.photos.push({ id, slot });
       rerender();
     } catch (e) { toast('อัปโหลดรูปไม่สำเร็จ'); }
@@ -171,10 +177,18 @@ function pickPhoto(slot, rerender) {
 
 function step2(rerender) {
   const grid = h('div', { class: 'slot-grid' }, ...SLOTS.map(d => slotTile(d, rerender)));
+  const known = SLOTS.map(d => d.slot);
+  const extras = work.photos.filter(p => !known.includes(p.slot));
   const count = work.photos.length;
-  const counter = h('div', { class: 'photo-counter' }, `${count} / 10 รูป`);
-  const amber = count < 5 ? h('div', { class: 'note-amber' }, TEXT.intake.under5) : null;
-  return h('div', {}, grid, counter, amber);
+  const extraTiles = extras.map((p, i) => photoTile(p, `รูปเพิ่มเติม ${i + 1}`, rerender));
+  if (count < 10) extraTiles.push(photoTile(null, '', rerender, { slot: 'extra', th: 'เพิ่มรูป', hint: '', ic: 'photoPlus' }));
+  return h('div', {},
+    grid,
+    h('div', { class: 'sub-title' }, 'รูปเพิ่มเติม'),
+    h('div', { class: 'slot-grid' }, ...extraTiles),
+    h('div', { class: 'photo-counter' }, `${count} / 10 รูป`),
+    count < 5 ? h('div', { class: 'note-amber' }, TEXT.intake.under5) : null,
+  );
 }
 
 // ---------- Step 3 (questions + contact) ----------
@@ -190,11 +204,11 @@ function step3(rerender) {
     field(TEXT.intake.meal, mealRow),
     field(TEXT.intake.nearby, nearRow),
     field(TEXT.intake.nearbyOther, textInput(a.nearbyOther, v => a.nearbyOther = v)),
-    h('div', { style: 'display:flex;gap:12px' },
+    h('div', { class: 'row2' },
       field(TEXT.intake.checkin, timeSel(a.checkin, v => a.checkin = v)),
       field(TEXT.intake.checkout, timeSel(a.checkout, v => a.checkout = v)),
     ),
-    h('div', { style: 'display:flex;gap:12px' },
+    h('div', { class: 'row2' },
       field(TEXT.intake.smoking, h('div', { class: 'toggle-row' },
         h('div', { class: 'seg' + (a.smoking ? ' on' : ''), on: { click: () => { a.smoking = true; rerender(); } } }, TEXT.intake.yes),
         h('div', { class: 'seg' + (!a.smoking ? ' on' : ''), on: { click: () => { a.smoking = false; rerender(); } } }, TEXT.intake.no))),
@@ -212,7 +226,7 @@ function step3(rerender) {
     (() => {
       const cb = h('input', { type: 'checkbox' }); cb.checked = !!work.pdpa;
       cb.addEventListener('change', () => { work.pdpa = cb.checked; updateFoot(); });
-      return h('label', { style: 'display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-top:6px' }, cb, h('span', {}, TEXT.intake.pdpa));
+      return h('label', { class: 'pdpa' }, cb, h('span', {}, TEXT.intake.pdpa));
     })(),
   );
 }
@@ -243,37 +257,42 @@ function updateFoot() {
   if (nextBtn) nextBtn.disabled = !stepValid();
 }
 
+// called by the LIFF header's close button: keep what was typed, go back to the chat
+export function saveIntakeWork() {
+  if (work) setState({ intake: JSON.parse(JSON.stringify(work)), intakeStep: step });
+  resetIntakeWork();
+}
+
+const STEP_TITLES = [TEXT.intake.s1, TEXT.intake.s2, TEXT.intake.s3];
+
 export function intakeScreen(state) {
   ensureWork();
-  const bodyEl = h('div', { class: 'sheet-body' });
+  const bodyEl = h('div', { class: 'page-body' });
   // re-check the Next/Submit button as the owner types (text inputs don't re-render the step)
   bodyEl.addEventListener('input', () => updateFoot());
   bodyEl.addEventListener('change', () => updateFoot());
-  const dots = h('div', { class: 'step-dots' }, h('i', { class: step >= 1 ? 'on' : '' }), h('i', { class: step >= 2 ? 'on' : '' }), h('i', { class: step >= 3 ? 'on' : '' }));
-  const stepTitle = h('span', { class: 's-step' }, `${step} / 3`);
 
-  const rerender = () => { renderBody(); };
+  const rerender = () => { const y = bodyEl.scrollTop; renderBody(); bodyEl.scrollTop = y; };
   function renderBody() {
-    bodyEl.replaceChildren(step === 1 ? step1(rerender) : step === 2 ? step2(rerender) : step3(rerender));
-    dots.children[0].className = step >= 1 ? 'on' : '';
-    dots.children[1].className = step >= 2 ? 'on' : '';
-    dots.children[2].className = step >= 3 ? 'on' : '';
-    stepTitle.textContent = `${step} / 3`;
+    bodyEl.replaceChildren(
+      h('div', { class: 'step-head' },
+        h('span', { class: 'st-title' }, STEP_TITLES[step - 1]),
+        h('span', { class: 'st-count' }, `ขั้น ${step} / 3`)),
+      h('div', { class: 'step-dots' }, ...[1, 2, 3].map(n => h('i', { class: step >= n ? 'on' : '' }))),
+      step === 1 ? step1(rerender) : step === 2 ? step2(rerender) : step3(rerender),
+    );
     buildFoot();
     updateFoot();
   }
 
-  const foot = h('div', { class: 'sheet-foot' });
+  const foot = h('div', { class: 'page-foot' });
   footEl = foot;
   function buildFoot() {
-    const back = h('button', { class: 'btn ghost', on: { click: () => { if (step > 1) { step--; renderBody(); } } } }, TEXT.intake.back);
-    if (step === 3) {
-      const submit = h('button', { class: 'btn primary foot-next', disabled: !stepValid(), on: { click: onSubmit } }, TEXT.intake.submit);
-      foot.replaceChildren(back, submit);
-    } else {
-      const next = h('button', { class: 'btn primary foot-next', disabled: !stepValid(), on: { click: () => { step++; renderBody(); } } }, TEXT.intake.next);
-      foot.replaceChildren(back, next);
-    }
+    const back = h('button', { class: 'btn ghost', disabled: step === 1, on: { click: () => { if (step > 1) { step--; renderBody(); bodyEl.scrollTop = 0; } } } }, TEXT.intake.back);
+    const next = step === 3
+      ? h('button', { class: 'btn primary foot-next', disabled: !stepValid(), on: { click: onSubmit } }, TEXT.intake.submit)
+      : h('button', { class: 'btn primary foot-next', disabled: !stepValid(), on: { click: () => { step++; renderBody(); bodyEl.scrollTop = 0; } } }, TEXT.intake.next);
+    foot.replaceChildren(back, next);
   }
 
   function onSubmit() {
@@ -283,16 +302,6 @@ export function intakeScreen(state) {
     startGeneration();
   }
 
-  const sheet = h('div', { class: 'sheet' },
-    h('div', { class: 'sheet-head' },
-      h('span', { class: 's-title' }, TEXT.intake.title),
-      stepTitle,
-      h('button', { class: 'x', title: 'ปิด', on: { click: () => { setState({ intake: JSON.parse(JSON.stringify(work)) }); resetIntakeWork(); go('chat'); } } }, '✕'),
-    ),
-    dots,
-    bodyEl,
-    foot,
-  );
   renderBody();
-  return sheet;
+  return h('div', { class: 'page' }, bodyEl, foot);
 }

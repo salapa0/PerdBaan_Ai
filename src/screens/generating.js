@@ -1,5 +1,5 @@
 // S3 — "AI is writing your listing". Drives the pipeline and shows live progress.
-import { h, TEXT } from '../ui/ui.js';
+import { h, icon, TEXT } from '../ui/ui.js';
 import { getState, setState } from '../state.js';
 import { botSay } from '../ui/chat.js';
 import { generateListing, useSavedNow } from '../ai/generateListing.js';
@@ -42,7 +42,7 @@ function setStep(n) {
   // steps are 1..5 → checklist rows 0..4 (step 1 marks row0 active; completing advances)
   ckEls.forEach((row, i) => {
     row.classList.remove('active', 'done');
-    if (i < n - 1) { row.classList.add('done'); row.querySelector('.mk').textContent = '✓'; }
+    if (i < n - 1) { row.classList.add('done'); row.querySelector('.mk').replaceChildren(icon('check', 13)); }
     else if (i === n - 1) { row.classList.add('active'); row.querySelector('.mk').textContent = ''; }
     else row.querySelector('.mk').textContent = '';
   });
@@ -65,7 +65,7 @@ export async function startGeneration() {
       { onToken: (chars) => { if (counterEl) counterEl.textContent = TEXT.gen.writing(chars); } },
     );
     // mark all done
-    ckEls.forEach(r => { r.classList.remove('active'); r.classList.add('done'); r.querySelector('.mk').textContent = '✓'; });
+    ckEls.forEach(r => { r.classList.remove('active'); r.classList.add('done'); r.querySelector('.mk').replaceChildren(icon('check', 13)); });
     setState({ draft, draftMeta, copyCards, stage: 'review', review: { ...getState().review, status: 'needs_review' } });
     await botSay(TEXT.afterSubmit);
   } catch (e) {

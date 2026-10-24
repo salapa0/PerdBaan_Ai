@@ -1,4 +1,4 @@
-// Boot. Order per spec §5.7.
+// App entry: restore state, render both panes, start the clock and the Ollama status check.
 import { CONFIG } from './config.js';
 import { getState, setState, subscribe, restore, notify } from './state.js';
 import { renderPhone } from './router.js';
@@ -11,8 +11,26 @@ import { mountToolbar, registerShortcuts } from './toolbar.js';
 // clock
 function tickClock() {
   const el = document.getElementById('clock');
-  if (el) el.textContent = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+  if (!el) return;
+  const d = new Date();
+  el.textContent = `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; // iOS style: 9:41, 13:05
 }
+
+// Fit the real-size phone (419 x 878 incl. bezel) to the window height. Scaling a vector layout
+// with CSS transform keeps text and icons sharp (no bitmap stretching).
+const DEVICE_W = 419, DEVICE_H = 878;
+function fitDevice() {
+  const col = document.getElementById('phone-col');
+  const dev = document.getElementById('device');
+  if (!col || !dev) return;
+  const top = document.body.classList.contains('has-toolbar') ? 64 : 20;
+  const availH = window.innerHeight - top - 20;
+  const scale = Math.min(1, availH / DEVICE_H);
+  dev.style.setProperty('--scale', scale.toFixed(4));
+  col.style.width = Math.round(DEVICE_W * scale) + 'px';
+  col.style.height = Math.round(DEVICE_H * scale) + 'px';
+}
+export { fitDevice };
 
 // Ollama status light
 export async function refreshOllama() {
@@ -31,9 +49,12 @@ export async function refreshOllama() {
 function boot() {
   restore();
 
-  // document title / bot name from config
-  const bn = document.getElementById('bot-name'); if (bn) bn.textContent = CONFIG.botName;
-  const av = document.getElementById('bot-avatar'); if (av) av.textContent = CONFIG.botAvatar;
+  fitDevice();
+  window.addEventListener('resize', fitDevice);
+
+  // tap the dimmed backdrop to close a bottom sheet (like a real phone)
+  const modal = document.getElementById('modal-root');
+  modal.addEventListener('click', (e) => { if (e.target === modal && !modal.querySelector('.viewer')) modal.replaceChildren(); });
 
   // render both panes from the same state
   subscribe(renderPhone);

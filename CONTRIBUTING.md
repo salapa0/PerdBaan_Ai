@@ -1,41 +1,49 @@
-# How we work together (3 people, 1 day)
+# Working on this repo
 
-## The three rules
-1. **Stay in your own files.** Conflicts only happen when two people change the same lines. The owner table is in README.md.
-2. **Pull before you push**, every time.
-3. **Commit small and often**, about every 30-60 minutes. Do not wait until the end.
+## Every time you work
 
-## One-time setup
-1. Accept the repo invitation (email from GitHub).
-2. Install Git, or GitHub Desktop (buttons instead of commands).
-3. Clone: `git clone https://github.com/salapa0/PerdBaan_Ai.git`
+In GitHub Desktop:
 
-## The loop (repeat all day)
+1. **Fetch origin**, then **Pull origin** if it appears. This gets the latest version.
+2. Make your changes.
+3. In the **Changes** tab, write a short summary of what you did, click **Commit to main**.
+4. **Push origin**.
+
+Commit small and often, so nobody loses work and conflicts stay small.
+
+Command-line equivalent:
 ```
-git pull                     # get everyone's latest work
-# ...do some work...
+git pull
 git add .
 git commit -m "short note on what you did"
-git pull                     # again, in case someone pushed meanwhile
 git push
 ```
-In GitHub Desktop: **Fetch/Pull**, then **Commit**, then **Push**.
 
-## If you see a conflict
-Git marks both versions in the file between `<<<<<<<` and `>>>>>>>`. Keep the version you want, delete the marker lines, save, then `git add .` and `git commit`. If it looks confusing, ask a teammate before you guess.
+## First time on a new computer
+
+In GitHub Desktop: **File → Clone repository → salapa0/PerdBaan_Ai**. Or:
+```
+git clone https://github.com/salapa0/PerdBaan_Ai.git
+```
+
+## If you get a conflict
+
+Two people changed the same lines. GitHub Desktop lists the files; open each one, keep the version you want, delete the `<<<<<<<`, `=======` and `>>>>>>>` marker lines, save, then commit. If it looks confusing, ask before guessing.
 
 ## Do not commit
-- Passwords, keys or `.env` files (they are in `.gitignore`)
-- Model files (download them with Ollama instead)
-- Huge photos (resize demo photos first)
 
-## Before the demo
-Once everything works end to end, mark it so you can always go back:
+- Passwords, keys or `.env` files
+- AI model files (download them with Ollama instead)
+- Large photos or videos (keep photos under 500 KB; keep recordings on a USB stick)
+
+## Data shapes
+
+The formats for the owner's form, the AI draft and the copy cards are in `src/data/shapes.js`. Update that file whenever you change a format.
+
+## Marking the demo version
+
+When the full demo works end to end, tag it so you can always get back to it:
 ```
 git tag demo-ready
 git push --tags
 ```
-After the freeze (about hour 10), only fix bugs, do not add features.
-
-## Agreed data shapes
-Everyone codes against the shapes in `src/data/shapes.js`. Change them only after telling the team.

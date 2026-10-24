@@ -1,5 +1,5 @@
 // S8 — staff console (right pane). One owner's draft, flags, coach activity, Approve & send.
-import { h, money, TEXT } from '../ui/ui.js';
+import { h, money, icon, TEXT } from '../ui/ui.js';
 import { getState, setState } from '../state.js';
 import { botSay } from '../ui/chat.js';
 import { thLabel } from '../data/options.js';
@@ -50,7 +50,7 @@ function draftEditor(d, review) {
 
   const hlRows = (d.highlights || []).map((hl, idx) => h('div', { class: 'hl-row' },
     ...['th', 'en', 'zh'].map(lng => { const inp = h('input', { value: hl[lng] || '' }); inp.addEventListener('change', () => { hl[lng] = inp.value; setState({ draft: { ...d } }); }); return inp; }),
-    h('button', { class: 'mini-x', on: { click: () => { d.highlights.splice(idx, 1); setState({ draft: { ...d } }); } } }, '✕'),
+    h('button', { class: 'mini-x', on: { click: () => { d.highlights.splice(idx, 1); setState({ draft: { ...d } }); } } }, icon('close', 14)),
   ));
 
   const reasonTa = h('textarea', { style: 'min-height:54px' }); reasonTa.value = d.price?.reason_th || '';
@@ -82,7 +82,7 @@ function flagsPanel(d, review) {
   const flags = d.flags || [];
   const hasError = flags.some(f => f.level === 'error') && !overrideErrors;
   const rows = flags.length ? flags.map(f => h('div', { class: 'flag ' + f.level },
-    h('span', { class: 'fid' }, f.id), h('span', {}, f.message_th))) : [h('div', { style: 'color:#16a34a;font-size:12px' }, '✓ No issues')];
+    h('span', { class: 'fid' }, f.id), h('span', {}, f.message_th))) : [h('div', { class: 'c-ok' }, icon('check', 16), 'No issues')];
   return h('div', { class: 'c-sec' },
     h('h4', {}, `Checks (${flags.length})`),
     ...rows,
@@ -102,7 +102,7 @@ export async function approveSend() {
 
 function connectionMonitor(s) {
   const ag = s.agoda;
-  const ticks = Object.entries(ag.readiness).map(([k, v]) => `${v ? '✓' : '✗'} ${TEXT.coach.readyDocs[k] || k}`).join('  ');
+  const ticks = 'Ready: ' + Object.entries(ag.readiness).filter(([, v]) => v).map(([k]) => TEXT.coach.readyDocs[k] || k).join(', ');
   const logRows = (ag.coachLog || []).filter(t => t.screenId !== undefined).map(t => h('div', { class: 'coachlog-row' },
     t.thumbUrl ? h('img', { src: t.thumbUrl }) : h('div', { style: 'width:46px;height:60px;background:#eef2f7;border-radius:6px' }),
     h('div', { class: 'cl-meta' },
