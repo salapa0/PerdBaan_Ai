@@ -20,3 +20,10 @@ npm-debug.log*
 # Logs and temp
 *.log
 tmp/
+
+# Local tool binaries
+tools/
+
+# Recordings (keep on USB, not in git)
+*.mp4
+*.mov
