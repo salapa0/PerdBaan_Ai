@@ -46,9 +46,9 @@ function chatHtml() {
 }
 
 // ---- rich menu grid (bottom of the chat) ----
-const TILES = [['📝', 'กรอกข้อมูล'], ['👀', 'ดูตัวอย่าง'], ['🔗', 'การเชื่อมต่อ'], ['📷', 'ถามเรื่องการสมัคร'], ['💰', 'ราคา/แพ็กเกจ'], ['❓', 'ช่วยเหลือ'], ['📞', 'ติดต่อกับเจ้าหน้าที่']];
+const TILES = [['📝', 'กรอกข้อมูล'], ['👀', 'ดูตัวอย่าง'], ['🔗', 'การเชื่อมต่อ/สมัคร'], ['💰', 'ราคา/แพ็กเกจ'], ['❓', 'ช่วยเหลือ'], ['📞', 'ติดต่อกับเจ้าหน้าที่']];
 function menuHtml() {
-  const s = state, on = [true, s.previewSent, s.approved, s.approved, true, true, true];
+  const s = state, on = [true, s.previewSent, s.approved, true, true, true];
   return `<button class="menubar" data-a="toggleMenu" aria-expanded="${s.menuOpen}"><span>เมนู</span><i class="chev ${s.menuOpen ? 'dn' : 'up'}"></i></button>`
     + (s.menuOpen ? `<div class="grid">${TILES.map(([e, l], i) => `<button class="tile ${on[i] ? '' : 'off'}" data-a="menu" data-v="${i}"><b aria-hidden="true">${e}</b><span>${l}</span></button>`).join('')}</div>` : '');
 }
@@ -158,7 +158,7 @@ export function dockHtml() {
     case 'form': return btn('ให้ AI เขียนประกาศ', 'write', '', !formValid()) + btn('ใช้บ้านตัวอย่าง', 'loadDemo', '', false, 'ghost');
     case 'preview': return s.approved ? btn('กลับไปที่แชท', 'close') : btn('อนุมัติ', 'approveOwner');
     case 'connections': return '';
-    case 'pricing': return btn('เริ่มกรอกข้อมูลฟรี', 'go', 'form') + btn('ติดต่อเจ้าหน้าที่', 'menu', '6', false, 'ghost');
+    case 'pricing': return btn('เริ่มกรอกข้อมูลฟรี', 'go', 'form') + btn('ติดต่อเจ้าหน้าที่', 'menu', '5', false, 'ghost');
     case 'coach': {
       const p = getPlatform(s.active), c = conn(), n = p.screens.length;
       return c.step <= n ? btn('ถัดไป', 'nextCoach') : btn('ส่งลิงก์', 'sendLink', '', !p.link.check(c.link).ok || c.linkSent);
