@@ -31,7 +31,7 @@ Together they need about 11 GB of RAM.
 
 ## Demo flow (about 3 minutes)
 
-1. **Shift+R** to reset. Tap **เริ่มเลย** in the chat.
+1. **Shift+R** to reset. Tap **เริ่มเลย** in the chat (or the **กรอกข้อมูล** tile in the menu grid at the bottom). Every page has a back arrow (top left).
 2. **Shift+L** loads the demo homestay. Submit with **ให้ AI เขียนประกาศ**.
 3. In the staff console: point at a check, edit a word, click **Approve & send preview**.
 4. On the phone: **ดูตัวอย่าง**, switch TH / EN / 中文, tap **อนุมัติ**.
@@ -51,6 +51,7 @@ Together they need about 11 GB of RAM.
 | Shift+P | Approve & send preview |
 | Shift+A | Simulate Agoda approval (live card) |
 | Shift+1 … 7 | Jump to a saved point in the demo |
+| Shift+B | Back one page |
 | Shift+R | Reset everything |
 
 ## Project layout

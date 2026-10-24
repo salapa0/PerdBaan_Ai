@@ -8,5 +8,7 @@ export function runChecks(draft, intake) {
   if (!/^0\d{1,2}-?\d{3}-?\d{4}$/.test((intake.contact.phone || '').trim())) add('error', 'E5', 'เบอร์โทรไม่ถูกต้อง');
   if (intake.rooms.reduce((n, r) => n + (+r.count || 0), 0) > 8) add('warn', 'W7', 'มีมากกว่า 8 ห้อง อาจไม่ใช่โฮมสเตย์');
   if (/https?:\/\/|www\./i.test(draft.desc_th + ' ' + draft.desc_en)) add('warn', 'W8', 'มีลิงก์ในคำอธิบาย');
+  const sum = intake.rooms.reduce((n, r) => n + (+r.count || 0), 0);
+  if (intake.totalRooms && sum !== intake.totalRooms) add('warn', 'W9', `ประเภทห้องรวม ${sum} ห้อง ไม่เท่ากับจำนวนห้องทั้งหมด ${intake.totalRooms}`);
   return f;
 }

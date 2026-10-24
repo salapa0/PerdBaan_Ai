@@ -5,6 +5,7 @@ import { renderConsole, renderChecks } from './console/console.js';
 import { initToolbar } from './toolbar.js';
 import { ping } from './ai/ollama.js';
 import { $ } from './ui/dom.js';
+import { roomSumHtml } from './screens/owner.js';
 import { checkAgodaLink } from './rules/checkAgodaLink.js';
 
 subscribe(() => { renderPhone(); renderConsole(); });
@@ -17,6 +18,7 @@ document.addEventListener('input', e => {
   const t = e.target;
   if (t.dataset.f) { actions.setField(t.dataset.f, t.value); renderDock(); }
   else if (t.hasAttribute('data-link')) { state.link = t.value; renderDock(); const m = $('#link-msg'), c = checkAgodaLink(t.value); m.className = c.ok ? 'ok' : 'err'; m.textContent = t.value ? c.msg : ''; }
+  else if (t.dataset.r) { actions.setRoom(...t.dataset.r.split(':'), t.value); $('#room-sum').innerHTML = roomSumHtml(); renderDock(); }
   else if (t.dataset.d) { actions.editDraft(t.dataset.d, t.value); renderChecks(); }
 });
 document.addEventListener('change', e => {
