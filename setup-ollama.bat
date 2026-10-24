@@ -1,7 +1,7 @@
 @echo off
 REM Helper: set OLLAMA_ORIGINS and pull the demo models.
 REM EDIT the two model tags below to the sizes that fit your RAM, then write the SAME tags
-REM into js\config.js (textModel / visionModel).
+REM into src\config.js (textModel / visionModel).
 
 echo.
 echo === 1) Allow the browser page to call Ollama ===
@@ -24,6 +24,6 @@ echo.
 echo === 3) Check ===
 ollama list
 echo.
-echo   Now open js\config.js and make textModel / visionModel match the tags above.
+echo   Now open src\config.js and make textModel / visionModel match the tags above.
 echo   Reload http://localhost:5173 - the console Ollama light should turn green.
 pause

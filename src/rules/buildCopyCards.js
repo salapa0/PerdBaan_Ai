@@ -1,37 +1,13 @@
-// Map draft + intake to Agoda sign-up copy cards, in Agoda's screen/field order.
-import { agodaScreens } from '../data/agodaFields.js';
-import { enLabel } from '../data/options.js';
-
+// Builds the "tap to copy" cards for each Agoda sign-up screen.
 export function buildCopyCards(draft, intake) {
-  const cards = [];
-  let order = 0;
-  for (const screen of agodaScreens) {
-    if (screen.repeatPerRoom) {
-      (intake.rooms || []).forEach((room, idx) => {
-        for (const f of screen.fields) {
-          let value = '';
-          try { value = f.from(room, intake, draft); } catch { value = ''; }
-          cards.push({
-            id: `${screen.screen}:${idx}:${f.agodaField}`,
-            screen: screen.screen, screen_th: screen.name_th,
-            agodaField: `${f.agodaField} (${room.name || enLabel('room', room.type)})`,
-            label_th: `${f.label_th} — ${room.name || enLabel('room', room.type)}`,
-            value: String(value ?? ''), order: order++, hintOnly: !!f.hintOnly,
-          });
-        }
-      });
-    } else {
-      for (const f of screen.fields) {
-        let value = '';
-        try { value = f.from(draft, intake); } catch { value = ''; }
-        cards.push({
-          id: `${screen.screen}:${f.agodaField}`,
-          screen: screen.screen, screen_th: screen.name_th,
-          agodaField: f.agodaField, label_th: f.label_th,
-          value: String(value ?? ''), order: order++, hintOnly: !!f.hintOnly,
-        });
-      }
-    }
-  }
-  return cards;
+  const c = [];
+  c.push({ screen: 'property', label: 'ชื่อที่พัก (EN)', value: draft.title_en });
+  c.push({ screen: 'property', label: 'ชื่อที่พัก (TH)', value: draft.title_th });
+  c.push({ screen: 'location', label: 'ที่อยู่', value: intake.location });
+  c.push({ screen: 'location', label: 'เบอร์โทร', value: intake.contact.phone });
+  c.push({ screen: 'location', label: 'หมุดแผนที่', value: 'ปักหมุดตรงทางเข้าบ้านพัก', hintOnly: true });
+  intake.rooms.forEach(r => c.push({ screen: 'rooms', label: `${r.name} ราคา/คืน`, value: String(r.price) }));
+  c.push({ screen: 'description', label: 'คำอธิบาย (EN)', value: draft.desc_en });
+  c.push({ screen: 'description', label: 'คำอธิบาย (TH)', value: draft.desc_th });
+  return c;
 }
