@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Poet Baan — logic tests</title>
+<style>body{font-family:system-ui,sans-serif;max-width:760px;margin:30px auto;padding:0 16px}
+.pass{color:#0a7f33}.fail{color:#c00;font-weight:700}.row{padding:3px 0;border-bottom:1px solid #eee;font-size:14px}
+h1{font-size:18px}#sum{font-weight:700;margin:12px 0;font-size:16px}</style></head>
+<body>
+<h1>เปิดบ้าน · Poet Baan — logic self-tests</h1>
+<div id="sum">running…</div>
+<div id="out"></div>
+<script type="module">
+import { runChecks } from './src/rules/runChecks.js';
+import { suggestPrice } from './src/rules/suggestPrice.js';
+import { checkAgodaLink } from './src/rules/checkAgodaLink.js';
+import { buildCopyCards } from './src/rules/buildCopyCards.js';
+import { validateDraft } from './src/ai/validate.js';
+import { coachScreenshot } from './src/ai/coach.js';
+import { demoHomestay } from './src/data/demoHomestay.js';
+import { savedDraft } from './src/data/savedDraft.js';
+import { agodaScreens } from './src/data/agodaFields.js';
+
+const out = document.getElementById('out');
+let pass = 0, fail = 0;
+function t(name, cond) {
+  const ok = !!cond; ok ? pass++ : fail++;
+  const d = document.createElement('div'); d.className = 'row ' + (ok ? 'pass' : 'fail');
+  d.textContent = (ok ? '✓ ' : '✗ FAIL ') + name; out.appendChild(d);
+  console[ok ? 'log' : 'error'](name, ok);
+}
+
+const intake = JSON.parse(JSON.stringify(demoHomestay));
+const draft = JSON.parse(JSON.stringify(savedDraft));
+
+// runChecks
+t('demo homestay has no errors', runChecks(draft, intake).filter(f => f.level === 'error').length === 0);
+(() => { const i = JSON.parse(JSON.stringify(intake)); i.rooms[0].price = 0; t('zero price → E1', runChecks(draft, i).some(f => f.id === 'E1')); })();
+(() => { const d = JSON.parse(JSON.stringify(draft)); d.desc_th += ' ดีที่สุดในโลก'; t('"ดีที่สุด" → E4', runChecks(d, intake).some(f => f.id === 'E4')); })();
+(() => { const i = JSON.parse(JSON.stringify(intake)); i.contact.phone = '12345'; t('bad phone 12345 → E5', runChecks(draft, i).some(f => f.id === 'E5')); })();
+(() => { const i = JSON.parse(JSON.stringify(intake)); i.contact.phone = '081-234-5678'; t('phone 081-234-5678 passes', !runChecks(draft, i).some(f => f.id === 'E5')); })();
+(() => { const i = JSON.parse(JSON.stringify(intake)); i.rooms = Array.from({length:9},(_,k)=>({...intake.rooms[0],id:'x'+k,count:1})); t('9 rooms → W7', runChecks(draft, i).some(f => f.id === 'W7')); })();
+(() => { const d = JSON.parse(JSON.stringify(draft)); d.desc_en += ' visit www.example.com'; t('URL in desc_en → W8', runChecks(d, intake).some(f => f.id === 'W8')); })();
+
+// checkAgodaLink
+t('sample agoda link OK', checkAgodaLink('https://www.agoda.com/baan/hotel/nan-th.html').ok);
+t('google.com fails', !checkAgodaLink('https://google.com/x').ok);
+t('agoda.com/ homepage fails', !checkAgodaLink('https://agoda.com/').ok);
+t('www.agoda.com/xyz without scheme passes', checkAgodaLink('www.agoda.com/xyz').ok);
+
+// buildCopyCards
+(() => { const cards = buildCopyCards(draft, intake);
+  t('copy cards built, non-empty', cards.length > 0);
+  t('no empty non-hint card values', cards.filter(c => !c.hintOnly).every(c => c.value && c.value.length));
+  t('cards cover every screen', agodaScreens.every(s => cards.some(c => c.screen === s.screen)));
+})();
+
+// validateDraft
+t('Thai in title_en is caught', validateDraft({ ...draft, title_en: 'บ้านไทย' }).bad.includes('title_en'));
+t('valid draft passes', validateDraft(draft).ok);
+
+// suggestPrice  (main room 790 → value 800, band 700–900)
+(() => { const p = suggestPrice(intake); t('suggestPrice 790 → 800 / 700–900', p.value === 800 && p.low === 700 && p.high === 900); })();
+
+// coach Plan B filename match (saved mode → no Ollama needed)
+(async () => {
+  const cards = buildCopyCards(draft, intake);
+  for (const s of agodaScreens) {
+    const r = await coachScreenshot({ base64: null, fileName: s.screen + '.png' }, cards, 3);
+    t('coach Plan B maps ' + s.screen, r.screen_id === s.screen);
+  }
+  document.getElementById('sum').textContent = `${pass} passed, ${fail} failed`;
+  document.getElementById('sum').className = fail ? 'fail' : 'pass';
+})();
+</script>
+</body></html>

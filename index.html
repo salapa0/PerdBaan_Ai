@@ -1,23 +1,58 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>เปิดบ้าน : AI helps rural homestays get listed on Agoda</title>
-  <!-- Owner: A (frontend). Starter page: two panes, owner phone (LINE style) and staff console. -->
-  <style>
-    body { margin: 0; font-family: system-ui, sans-serif; background: #f3f4f6; }
-    #app { display: flex; gap: 24px; justify-content: center; padding: 24px; }
-    #phone { width: 375px; height: 700px; background: #fff; border: 1px solid #d1d5db; border-radius: 24px; overflow: hidden; }
-    #console { flex: 1; max-width: 560px; background: #fff; border: 1px solid #d1d5db; border-radius: 12px; padding: 16px; }
-    h2 { margin-top: 0; font-size: 16px; }
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>เปิดบ้าน · Poet Baan (demo)</title>
+  <link rel="stylesheet" href="src/ui/app.css" />
 </head>
 <body>
-  <div id="app">
-    <section id="phone" aria-label="Owner phone (LINE style)"></section>
-    <section id="console" aria-label="Staff console"><h2>Staff console</h2></section>
-  </div>
+  <!-- Hidden demo toolbar (Shift+D to show). Populated by main.js -->
+  <header id="toolbar" class="toolbar" hidden></header>
+
+  <main class="stage">
+    <!-- Left: owner phone (LINE style) -->
+    <div class="phone-wrap">
+      <div id="phone" class="phone">
+        <div class="phone-notch"></div>
+        <div class="statusbar">
+          <span id="clock">—</span>
+          <span class="statusbar-right">
+            <span class="sb-ic">▟</span><span class="sb-ic">◗</span><span class="sb-bat">82%</span>
+          </span>
+        </div>
+        <div id="line-header" class="line-header">
+          <button class="icon-btn" aria-label="back">‹</button>
+          <div class="line-avatar" id="bot-avatar">ปบ</div>
+          <div class="line-title">
+            <div class="line-name" id="bot-name">ผู้ช่วยลงประกาศ</div>
+            <div class="line-sub">เปิดบ้าน · ออนไลน์</div>
+          </div>
+          <button class="icon-btn" aria-label="menu">☰</button>
+        </div>
+        <div id="screen" class="screen"></div>
+        <div id="dock" class="dock"></div>
+        <div id="modal-root"></div>
+        <div id="toast-root"></div>
+      </div>
+    </div>
+
+    <!-- Right: staff console -->
+    <aside id="console" class="console">
+      <div class="console-head">
+        <div>
+          <div class="console-title">Staff console</div>
+          <div class="console-sub" id="console-owner">—</div>
+        </div>
+        <div class="console-head-right">
+          <span id="ollama-light" class="light light-red" title="Ollama status">●</span>
+          <span id="ollama-label" class="light-label">Ollama</span>
+        </div>
+      </div>
+      <div id="console-body" class="console-body"></div>
+    </aside>
+  </main>
+
   <script type="module" src="src/app.js"></script>
 </body>
 </html>

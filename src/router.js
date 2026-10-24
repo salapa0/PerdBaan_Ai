@@ -1,0 +1,114 @@
+// Routing: which screen renders for the current stage, and the button-action table.
+import { getState, setState } from './state.js';
+import { botSay, botSayNow } from './ui/chat.js';
+import { TEXT, toast } from './ui/ui.js';
+
+import { chatHome, buildDock } from './screens/chatHome.js';
+import { intakeScreen } from './screens/intake.js';
+import { generatingScreen } from './screens/generating.js';
+import { previewScreen } from './screens/preview.js';
+import { connectionsScreen } from './screens/connections.js';
+import { coachScreen } from './screens/coach.js';
+
+const screens = {
+  chat: chatHome,
+  review: chatHome,
+  waiting: chatHome,
+  live: chatHome,
+  intake: intakeScreen,
+  generating: generatingScreen,
+  preview: previewScreen,
+  connections: connectionsScreen,
+  coach: coachScreen,
+};
+
+export function renderPhone() {
+  const mount = document.getElementById('screen');
+  if (!mount) return;
+  const state = getState();
+  const fn = screens[state.stage] || chatHome;
+  const node = fn(state);
+  mount.replaceChildren(node);
+
+  // dock: rich menu on chat-family stages, hidden otherwise
+  const dock = document.getElementById('dock');
+  const isChat = ['chat', 'review', 'waiting', 'live'].includes(state.stage);
+  if (dock) {
+    if (isChat) dock.replaceChildren(buildDock(state));
+    else dock.replaceChildren();
+  }
+
+  if (isChat) requestAnimationFrame(() => { mount.scrollTop = mount.scrollHeight; });
+  else mount.scrollTop = 0;
+}
+
+export function go(stage) {
+  setState({ stage });
+}
+
+// The single action table. Every card/dock button routes through here.
+export function doAction(action, payload = null) {
+  const s = getState();
+  switch (action) {
+    case 'open_intake':
+      if (!s.intake) initEmptyIntake();
+      setState({ stage: 'intake', intakeStep: 1 });
+      break;
+    case 'open_preview':
+      setState({ stage: 'preview' });
+      break;
+    case 'open_connections':
+      setState({ stage: 'connections' });
+      break;
+    case 'start_agoda':
+      setState({ agoda: { ...s.agoda, status: 'connecting', step: 1 }, stage: 'coach' });
+      break;
+    case 'continue_agoda':
+      setState({ stage: 'coach' });
+      break;
+    case 'open_agoda_listing': {
+      const url = s.agoda.listingUrl;
+      if (url && navigator.onLine) { window.open(url, '_blank'); }
+      else {
+        // offline stand-in: open the saved live page image in the viewer
+        import('./screens/coach.js').then(m => m.openImageViewer('public/agoda/agoda-live.png', 'ตัวอย่างหน้าประกาศบน Agoda (ภาพจำลองออฟไลน์)'));
+      }
+      break;
+    }
+    case 'share_listing': {
+      const url = s.agoda.listingUrl || 'https://www.agoda.com/';
+      copy(url).then(ok => toast(ok ? TEXT.live.shared : TEXT.clipboardFail));
+      break;
+    }
+    default:
+      console.warn('unknown action', action);
+  }
+}
+
+function copy(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text).then(() => true).catch(() => false);
+  }
+  return Promise.resolve(false);
+}
+
+function initEmptyIntake() {
+  setState({
+    intake: {
+      place: { name: '', village: '', district: '', province: '', address: '', postcode: '' },
+      owner: { name: '' },
+      rooms: [newRoom()],
+      photos: [],
+      answers: { facilities: [], meal: 'breakfast_incl', nearby: [], nearbyOther: '', checkin: '14:00', checkout: '11:00', smoking: false, pets: false, quietAfter: '22:00', note: '' },
+      contact: { phone: '', email: '', line: '', licence: '' },
+      pdpa: false,
+    },
+  });
+}
+
+export function newRoom() {
+  return { id: 'r' + Math.random().toString(36).slice(2, 7), type: 'double', name: '', count: 1, beds: [{ type: 'double', qty: 1 }], maxGuests: 2, price: 800, bathroom: 'private', aircon: true };
+}
+
+// exposed so the generating pipeline can post the "ready" card into chat after review
+export { botSay, botSayNow };

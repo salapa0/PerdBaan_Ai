@@ -8,7 +8,7 @@
 ## One-time setup
 1. Accept the repo invitation (email from GitHub).
 2. Install Git, or GitHub Desktop (buttons instead of commands).
-3. Clone: `git clone https://github.com/salapa0/rural-tourism-ai-listing.git`
+3. Clone: `git clone https://github.com/salapa0/PerdBaan_Ai.git`
 
 ## The loop (repeat all day)
 ```

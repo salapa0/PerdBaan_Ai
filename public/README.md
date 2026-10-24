@@ -8,5 +8,6 @@
 | --- | --- |
 | `fonts/` | The Noto Sans Thai font files, so Thai text looks right offline |
 | `demo-photos/` | Photos of the demo homestay |
+| `agoda/` | Agoda sign-up screens shown in the coach (`agoda-01.png`…`agoda-08.png`) + `agoda-live.png` |
 
 Keep every image small (under 500 KB) so the app stays fast and the repo stays light.
