@@ -62,9 +62,15 @@ export function screenHtml() {
     case 'writing': return `<div class="spin"></div><p class="center">กำลังเขียนไทย อังกฤษ จีน…</p>`;
     case 'preview': {
       const L = s.lang, d = s.draft, p = suggestPrice(i);
-      return `<div class="tabs">${[['th', 'ไทย'], ['en', 'EN'], ['zh', '中文']].map(([k, n]) => `<button data-a="setLang" data-v="${k}" class="${L === k ? 'on' : ''}">${n}</button>`).join('')}</div>`
-        + `<h3>${esc(d['title_' + L])}</h3><p>${esc(d['desc_' + L])}</p>${previewExtra(i)}<p class="muted">ราคาที่แนะนำ ${p.value} บาท/คืน (ช่วง ${p.low}–${p.high}) · ${esc(i.contact.phone)}</p>`
-        + (s.approved ? `<p class="ok">✓ คุณอนุมัติแล้ว</p>` : '');
+      const tabs = `<div class="tabs">${[['th', 'ไทย'], ['en', 'EN'], ['zh', '中文']].map(([k, n]) => `<button data-a="setLang" data-v="${k}" class="${L === k ? 'on' : ''}">${n}</button>`).join('')}</div>`;
+      return tabs + `<article class="listing">`
+        + `<div class="listing-head"><h3>${esc(d['title_' + L])}</h3><div class="listing-loc">📍 ${esc(i.location)}</div></div>`
+        + `<div class="listing-body">`
+        + `<div class="price-badge"><b>${p.value}</b><span class="unit">บาท/คืน</span><span class="rng">ช่วง ${p.low}–${p.high}</span></div>`
+        + `<p>${esc(d['desc_' + L])}</p>${previewExtra(i)}`
+        + `<p class="muted fine">💡 ราคาที่ AI แนะนำจากข้อมูลของคุณ · ติดต่อ ${esc(i.contact.phone)}</p>`
+        + `</div></article>`
+        + (s.approved ? `<p class="ok center">✓ คุณอนุมัติประกาศนี้แล้ว</p>` : '');
     }
     case 'connections': return connectionsHtml();
     case 'coach': return coachHtml();
@@ -151,5 +157,6 @@ function formHtml() {
 
 function previewExtra(i) {
   const am = allAmenities(i);
-  return `<ul class="plist">${i.rooms.map(r => `<li>${esc(r.name)} × ${r.count} ห้อง · ${esc(r.price)} บาท/คืน</li>`).join('')}</ul>` + (am.length ? `<div class="chipset">${am.map(a => `<span class="chip on">${esc(a)}</span>`).join('')}</div>` : '');
+  return `<div><p class="plabel">ห้องพัก</p><ul class="plist">${i.rooms.map(r => `<li>${esc(r.name)} × ${r.count} ห้อง · ${esc(r.price)} บาท/คืน</li>`).join('')}</ul></div>`
+    + (am.length ? `<div><p class="plabel">สิ่งอำนวยความสะดวก</p><div class="chipset">${am.map(a => `<span class="chip on">${esc(a)}</span>`).join('')}</div></div>` : '');
 }
