@@ -6,5 +6,6 @@
 - `platforms.js`: every booking/discovery channel (Agoda, Google Business Profile) as data — screens, copy-card mapping, link check and verify, all in one object per platform. The Connections page, coach walk-through and staff console render from this array, so adding a channel is adding one object here.
 - `agodaFields.js`: backward-compatible view of Agoda's sign-up fields (derived from `platforms.js`); kept for older imports and `test.html`
 - `coachScreens.js`: the Thai coach answer for each sign-up screen
-- `options.js`: labels for every choice in the form (Thai and English)
+- `options.js`: every choice in the form (Thai), the photo limits, and the English / Chinese name of each choice (`TERMS`)
+- `i18n.js`: the listing preview's interface text in Thai, English and Chinese, plus helpers that show a choice or place name in the page language
 - `snapshots.js`: saved points in the demo for Shift+1 … 7

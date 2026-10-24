@@ -17,6 +17,10 @@ import { coachScreenshot } from './src/ai/coach.js';
 import { demoHomestay } from './src/data/demoHomestay.js';
 import { savedDraft } from './src/data/savedDraft.js';
 import { agodaScreens } from './src/data/agodaFields.js';
+import { state } from './src/state.js';
+import { platforms } from './src/data/platforms.js';
+import { screenHtml, headerHtml, dockHtml } from './src/screens/owner.js';
+import { customTerms, TERMS, ROOM_TYPES, AMENITIES, MAX_PHOTOS } from './src/data/options.js';
 
 const out = document.getElementById('out');
 let pass = 0, fail = 0;
@@ -58,6 +62,81 @@ t('valid draft passes', validateDraft(draft).ok);
 
 // suggestPrice  (main room 790 → value 800, band 700–900)
 (() => { const p = suggestPrice(intake); t('suggestPrice 790 → 800 / 700–900', p.value === 800 && p.low === 700 && p.high === 900); })();
+
+
+// photos in the form and the checks
+(() => {
+  t('demo homestay has at least 5 photos', intake.photos.length >= 5 && intake.photos.length <= MAX_PHOTOS);
+  t('5+ photos → no W10', !runChecks(draft, intake).some(f => f.id === 'W10'));
+  (() => { const i = JSON.parse(JSON.stringify(intake)); i.photos = []; t('no photos → W10 (warning, not error)', runChecks(draft, i).some(f => f.id === 'W10' && f.level === 'warn')); })();
+  (() => { const i = JSON.parse(JSON.stringify(intake)); i.photos = i.photos.slice(0, 3); t('3 photos → W10', runChecks(draft, i).some(f => f.id === 'W10')); })();
+  Object.assign(state, { step: 'form', intake: JSON.parse(JSON.stringify(intake)), draft: null });
+  const f = screenHtml();
+  t('form has the photo upload input', /<input[^>]*type="file"[^>]*multiple[^>]*data-photos/.test(f));
+  t('form shows every photo with a remove button', (f.match(/data-a="removePhoto"/g) || []).length === intake.photos.length);
+  Object.assign(state, { intake: { ...state.intake, photos: [] } });
+  t('empty form: upload input present, no photos listed', /data-photos/.test(screenHtml()) && !/removePhoto/.test(screenHtml()));
+  Object.assign(state, { intake: { ...state.intake, photos: Array.from({ length: MAX_PHOTOS }, (_, k) => 'public/demo-photos/0' + (k % 6 + 1) + '.jpg') } });
+  t('at the photo limit the upload tile is hidden', !/data-photos/.test(screenHtml()));
+})();
+
+// customTerms / dictionary
+t('every form choice has an English and a Chinese name', [...ROOM_TYPES, ...AMENITIES].every(k => TERMS[k] && TERMS[k].en && TERMS[k].zh));
+t('demo homestay needs no AI translation of terms', customTerms(intake).length === 0);
+t('custom room + other amenity are listed for the AI', (() => { const i = JSON.parse(JSON.stringify(intake)); i.rooms.push({ id: 'c', name: 'ห้องแพ', custom: true, price: 500, count: 1 }); i.amenityOtherOn = true; i.amenityOther = 'เรือคายัค, ตกปลา'; return JSON.stringify(customTerms(i)) === JSON.stringify(['ห้องแพ', 'เรือคายัค', 'ตกปลา']); })());
+
+// preview page: each language tab is all in that language
+(() => {
+  const TH_RE = /[฀-๿]/, ZH_RE = /[一-鿿]/;
+  const visible = h => { h = h.replace(/<div class="tabs">.*?<\/div>/s, ''); return h.replace(/<[^>]*>/g, ' ') + ' ' + [...h.matchAll(/(?:alt|aria-label)="([^"]*)"/g)].map(m => m[1]).join(' '); };
+  for (const approved of [false, true]) for (const L of ['th', 'en', 'zh']) {
+    Object.assign(state, { step: 'preview', lang: L, approved, photoIdx: 0, intake: JSON.parse(JSON.stringify(intake)), draft: JSON.parse(JSON.stringify(savedDraft)) });
+    const tx = visible(screenHtml()), tag = `${L}${approved ? ' (approved)' : ''}`;
+    if (L === 'th') t(`preview ${tag}: no Chinese characters`, !ZH_RE.test(tx));
+    if (L === 'en') t(`preview ${tag}: no Thai or Chinese characters`, !TH_RE.test(tx) && !ZH_RE.test(tx));
+    if (L === 'zh') t(`preview ${tag}: no Thai, and no English words`, !TH_RE.test(tx) && !/[A-Za-z]{2,}/.test(tx.replace(/Wi-Fi/g, '')));
+    if (L === 'th') t(`preview ${tag}: Thai wording present`, tx.includes('บาท/คืน') && tx.includes('ห้องริมน้ำ'));
+    if (L === 'en') t(`preview ${tag}: English wording present`, tx.includes('THB / night') && tx.includes('Riverside Room') && tx.includes('Phu Phiang'));
+    if (L === 'zh') t(`preview ${tag}: Chinese wording present`, tx.includes('泰铢/晚') && tx.includes('河畔客房') && tx.includes('南府'));
+    t(`preview ${tag}: photos shown`, /class="g-main"/.test(screenHtml()));
+    t(`preview ${tag}: header title and bottom button stay Thai`, headerHtml().includes('ดูตัวอย่างประกาศ') && dockHtml().includes(approved ? 'กลับไปที่แชท' : 'อนุมัติ'));
+  }
+  // owner-typed terms use the AI translation, else stay as typed
+  const i2 = JSON.parse(JSON.stringify(intake)); i2.rooms.push({ id: 'c', name: 'ห้องแพ', custom: true, price: 500, count: 1 });
+  const d2 = { ...JSON.parse(JSON.stringify(savedDraft)), tr_en: { 'ห้องแพ': 'Raft Room' }, tr_zh: { 'ห้องแพ': '竹筏房' } };
+  Object.assign(state, { step: 'preview', approved: false, intake: i2, draft: d2 });
+  state.lang = 'en'; t('custom room name uses the AI English translation', screenHtml().includes('Raft Room'));
+  state.lang = 'zh'; t('custom room name uses the AI Chinese translation', screenHtml().includes('竹筏房'));
+  state.lang = 'th'; t('custom room name stays as typed on the Thai page', screenHtml().includes('ห้องแพ'));
+})();
+
+// step 4 of every platform is the photos page, showing the form's photos
+(() => {
+  for (const pl of platforms) {
+    t(pl.name + ': step 4 is the photos screen', pl.screens[3] && pl.screens[3].screen === 'photos');
+    Object.assign(state, { step: 'coach', active: pl.id, intake: JSON.parse(JSON.stringify(intake)), draft: JSON.parse(JSON.stringify(savedDraft)) });
+    state.conns[pl.id].step = 4;
+    const h = screenHtml();
+    t(pl.name + ': step 4 shows all ' + intake.photos.length + ' photos', (h.match(/<img /g) || []).length === intake.photos.length);
+    state.intake.photos = [];
+    t(pl.name + ': step 4 with no photos says so', /ยังไม่มีรูป/.test(screenHtml()) && !/<img /.test(screenHtml()));
+    state.conns[pl.id].step = 1;
+  }
+})();
+
+// each channel posts its own announcement card the moment it goes live
+(() => {
+  const mk = live => { Object.assign(state, { step: 'chat', approved: true, started: true, previewSent: true, intake: JSON.parse(JSON.stringify(intake)), draft: JSON.parse(JSON.stringify(savedDraft)) });
+    platforms.forEach(p => Object.assign(state.conns[p.id], { link: p.sample, linkSent: true, live: live.includes(p.id) })); return screenHtml(); };
+  const cards = h => (h.match(/class="ann-tag">[^<]*/g) || []).map(x => x.replace(/.*>/, ''));
+  t('nothing live → no announcement card', cards(mk([])).length === 0);
+  t('Agoda live → one card, "ประกาศบน Agoda"', JSON.stringify(cards(mk(['agoda']))) === JSON.stringify(['ประกาศบน Agoda']));
+  t('Google live → its own card only', JSON.stringify(cards(mk(['google']))) === JSON.stringify(['ประกาศบน Google']));
+  const both = mk(['agoda', 'google']);
+  t('both live → two separate cards', cards(both).length === 2);
+  t('card has cover photo, title, link and copy button', /class="bub ann"><img src="public\/demo-photos\/01-front\.jpg"/.test(both) && both.includes(savedDraft.title_th) && both.includes(platforms[0].sample) && /data-a="copyLink" data-v="agoda"/.test(both));
+  platforms.forEach(p => Object.assign(state.conns[p.id], { link: '', linkSent: false, live: false }));
+})();
 
 // coach Plan B filename match (saved mode → no Ollama needed)
 (async () => {

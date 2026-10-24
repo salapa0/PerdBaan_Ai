@@ -23,7 +23,8 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('change', e => {
   if (e.target.hasAttribute('data-shot') && e.target.files[0]) actions.screenshot(e.target.files[0]);
-  if (e.target.hasAttribute('data-link')) emit();
+  if (e.target.hasAttribute('data-photos') && e.target.files.length) actions.addPhotos([...e.target.files]);
+  // (no re-render on blur for the link field: it would replace the "ส่งลิงก์" button under the pointer and swallow the first click; the input handler above already keeps it up to date)
 });
 
 // Scale the 413x872 phone to fit the window

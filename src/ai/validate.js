@@ -1,4 +1,4 @@
-const TH = /[\u0E00-\u0E7F]/, ZH = /[\u4E00-\u9FFF]/;
+export const TH = /[\u0E00-\u0E7F]/, ZH = /[\u4E00-\u9FFF]/;
 export function validateDraft(d) {
   const bad = [];
   for (const k of ['title_th', 'desc_th']) if (!TH.test(d[k] || '')) bad.push(k);

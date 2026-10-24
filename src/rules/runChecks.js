@@ -10,5 +10,7 @@ export function runChecks(draft, intake) {
   if (/https?:\/\/|www\./i.test(draft.desc_th + ' ' + draft.desc_en)) add('warn', 'W8', 'มีลิงก์ในคำอธิบาย');
   const sum = intake.rooms.reduce((n, r) => n + (+r.count || 0), 0);
   if (intake.totalRooms && sum !== intake.totalRooms) add('warn', 'W9', `ประเภทห้องรวม ${sum} ห้อง ไม่เท่ากับจำนวนห้องทั้งหมด ${intake.totalRooms}`);
+  const np = (intake.photos || []).length;
+  if (np < 5) add('warn', 'W10', np ? `มีรูปที่พักแค่ ${np} รูป (แนะนำอย่างน้อย 5 รูป)` : 'ยังไม่ได้เพิ่มรูปที่พัก (แนะนำอย่างน้อย 5 รูป)');
   return f;
 }
