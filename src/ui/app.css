@@ -180,3 +180,8 @@ textarea{resize:vertical}
 .pb-acts{display:flex;border-top:1px solid #eee}
 .pb-acts span{flex:1;text-align:center;padding:10px 4px;font-size:12px;color:var(--brand);border-left:1px solid #eee}
 .pb-acts span:first-child{border-left:0}
+
+/* pricing & packages screen */
+.pr-hot{border:2px solid var(--g);background:#f3fcf6}
+.pr-row{margin:6px 0 2px}
+.pr-amt{font-size:24px;font-weight:700;color:var(--gd)}
