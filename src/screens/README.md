@@ -1,11 +1,13 @@
 # src/screens: what the owner sees on the phone
 
-1. `chatHome.js`: LINE chat with the official account, rich menu and keyboard bar
-2. `intake.js`: the 3-step form (rooms and prices, photos, quick questions and contact)
-3. `generating.js`: "AI is writing your listing"
-4. `preview.js`: the listing preview in TH / EN / 中文, approve or request a change
-5. `connections.js`: the Agoda card and its status
-6. `coach.js`: the step-by-step Agoda sign-up coach, including screenshot help
-7. `liveCard.js`: the "now live on Agoda" card
+**What goes here:** one file per screen the owner sees, in order:
+1. Chat (LINE style) with the "Load demo homestay" button
+2. Intake form (3 steps: rooms and prices, photos, quick questions and phone)
+3. "AI is writing your listing" loading screen
+4. Preview of the Agoda listing, with Approve
+5. Connections page (the Agoda card and its status)
+6. AI coach screen (checklist, copy cards, send screenshot) **owned by B**
+7. Live card after Agoda approval
 
-Screens 2 to 6 open like LINE mini-apps (LIFF pages) with their own header. Screens call `ai/` and `rules/`; they do not contain that logic.
+**Who:** A (frontend), except the coach screen, which is B.
+**Not here:** AI code (`src/ai/`), checks (`src/rules/`) or the staff screen (`src/console/`). A screen should call those, not contain them.

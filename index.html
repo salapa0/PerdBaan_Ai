@@ -1,65 +1,28 @@
 <!doctype html>
 <html lang="th">
 <head>
+<<<<<<< HEAD
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>เปิดบ้าน · Poet Baan (demo)</title>
   <link rel="preload" href="public/fonts/noto-sans-thai-thai-400-normal.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="public/fonts/noto-sans-thai-thai-700-normal.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="src/ui/app.css" />
+=======
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>เปิดบ้าน : AI helps rural homestays get listed on Agoda</title>
+  <!-- Owner: A (frontend). Two panes: owner phone (LINE style) and staff console. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="src/ui/style.css">
+>>>>>>> parent of 1b829a5 (ver1 of 1)
 </head>
 <body>
-  <!-- Hidden presenter toolbar (Shift+D). Filled by src/toolbar.js -->
-  <header id="toolbar" class="toolbar" hidden></header>
-
-  <main class="stage">
-    <!-- Left: the owner's phone. Real iPhone 15 screen size (393 x 852 CSS px), scaled to fit. -->
-    <div class="phone-col" id="phone-col">
-      <div class="device" id="device">
-        <span class="hw-btn hw-action"></span><span class="hw-btn hw-vol-up"></span><span class="hw-btn hw-vol-down"></span><span class="hw-btn hw-power"></span>
-        <div id="phone" class="phone">
-          <div class="island" aria-hidden="true"></div>
-
-          <div class="statusbar" id="statusbar">
-            <span id="clock" class="sb-time">9:41</span>
-            <span class="sb-icons" aria-hidden="true">
-              <svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
-              <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 11.5l2.2-2.6a3.4 3.4 0 0 0-4.4 0z"/><path d="M8 6.2c1.6 0 3 .6 4.1 1.5l1.4-1.6A8.2 8.2 0 0 0 8 4a8.2 8.2 0 0 0-5.5 2.1l1.4 1.6A6.2 6.2 0 0 1 8 6.2z"/><path d="M8 1.9c2.7 0 5.1 1 7 2.6L16 3.3A11 11 0 0 0 8 0 11 11 0 0 0 0 3.3l1 1.2A10 10 0 0 1 8 1.9z"/></svg>
-              <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="17" height="9" rx="2"/><path d="M25 4.5v4a2 2 0 0 0 0-4z" opacity=".45"/></svg>
-            </span>
-          </div>
-
-          <!-- LINE chat header (chat stages) -->
-          <header id="line-header" class="line-header"></header>
-          <!-- LIFF mini-app header (form / preview / connections / coach stages) -->
-          <header id="liff-header" class="liff-header" hidden></header>
-
-          <div id="screen" class="screen"></div>
-          <div id="dock" class="dock"></div>
-          <div class="home-indicator" aria-hidden="true"></div>
-
-          <div id="modal-root"></div>
-          <div id="toast-root"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right: staff console -->
-    <aside id="console" class="console">
-      <div class="console-head">
-        <div>
-          <div class="console-title">Staff console</div>
-          <div class="console-sub" id="console-owner">—</div>
-        </div>
-        <div class="console-head-right">
-          <span id="ollama-light" class="light light-red" title="Ollama status"></span>
-          <span id="ollama-label" class="light-label">Ollama</span>
-        </div>
-      </div>
-      <div id="console-body" class="console-body"></div>
-    </aside>
-  </main>
-
+  <div id="app">
+    <section id="phone" aria-label="Owner phone (LINE style)"></section>
+    <section id="console" aria-label="Staff console"><h2>Staff console</h2></section>
+  </div>
   <script type="module" src="src/app.js"></script>
 </body>
 </html>

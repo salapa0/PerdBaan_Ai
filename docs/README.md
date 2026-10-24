@@ -1,7 +1,7 @@
 # docs: decisions and plans (written notes)
 
 **What goes here:** text that explains what we decided and what we are building. People read it, the app does not.
-Update it when a decision changes.
+**Who:** everyone. Update it when a decision changes.
 **Not here:** code, photos, screenshots or slides.
 
 | File | Read it when |
