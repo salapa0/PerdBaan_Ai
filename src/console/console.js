@@ -87,6 +87,7 @@ function activityLog() {
     if (c.linkSent) ev.push(`${p.short || p.name}: link received from owner`);
     if (c.live) ev.push(`${p.short || p.name}: published and live`);
   });
+  s.customers.forEach(c => ev.push(`Guest enquiry · ${c.name} · ${c.nights} night(s) · ${c.amount}฿`));
   if (!ev.length) ev.push('No activity yet');
   return `<ol class="log">${ev.map(e => `<li>${esc(e)}</li>`).join('')}</ol>`;
 }
@@ -123,7 +124,7 @@ export function renderConsole() {
       + section('Content quality', `<span class="tag ${s.source === 'Live AI' ? 'tag-live' : ''}">${esc(s.source)}</span><div id="checks" class="checks"></div>`)
       + section('Channel manager', platforms.map(channelRow).join(''))
       + section('Activity', activityLog())
-      + `<div class="admin-foot"><button class="ghostlink" data-a="reset">Reset session (Shift+R)</button></div>`;
+      + `<div class="admin-foot"><button class="btn ghost sm" data-a="simulateCustomer">Simulate guest ping (Shift+C)</button><button class="ghostlink" data-a="reset">Reset session (Shift+R)</button></div>`;
   }
 
   $('#console-body').innerHTML = body;

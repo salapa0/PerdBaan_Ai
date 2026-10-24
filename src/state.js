@@ -8,6 +8,7 @@ const blank = () => ({
   intake: { name: '', location: '', contact: { phone: '' }, totalRooms: 1, rooms: [], amenities: [], amenityOtherOn: false, amenityOther: '', features: '' },
   draft: null, source: '', busy: false, approved: false,
   hist: [], started: false, previewSent: false, menuOpen: true,
+  customers: [],
   active: platforms[0].id,
   conns: Object.fromEntries(platforms.map(p => [p.id, blankConn()])),
   mode: config.defaultMode, ollama: false,
