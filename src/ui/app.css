@@ -147,3 +147,36 @@ textarea{resize:vertical}
 .plabel{margin:0 0 6px;font-size:12px;font-weight:600;color:var(--mute)}
 .listing .chip{cursor:default}
 .fine{font-size:12px}
+
+/* preview-on-each-platform page: each banner mimics its channel's real look */
+.looks-intro{margin:0 0 14px;font-size:13px}
+.pbanner{--brand:#5392f9;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 4px rgba(40,33,18,.08);color:#1f2430}
+.pb-top{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #eee;background:var(--brand);color:#fff}
+.pb-mark{font-weight:800;font-size:15px;letter-spacing:.2px}
+.pb-cap{font-size:11px;opacity:.9}
+.pb-sim{margin-left:auto;font-size:10px;background:rgba(255,255,255,.22);border-radius:99px;padding:2px 8px}
+/* booking (Agoda-style search result) */
+.pb-hero{height:120px;background:linear-gradient(135deg,#dfe7f3,#c4d2e8);display:grid;place-items:center;font-size:30px;color:#8ea3c4}
+.pb-body{padding:12px 14px}
+.pb-line{display:flex;align-items:flex-start;gap:8px}
+.pb-line h4{margin:0;font-size:16px;line-height:1.3;flex:1}
+.pb-new{flex:none;font-size:11px;font-weight:700;color:var(--brand);border:1px solid currentColor;border-radius:6px;padding:1px 6px}
+.pb-sub{color:#5a6474;font-size:13px;margin-top:4px}
+.pb-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.pb-tags span{font-size:11px;background:#eef2f8;color:#3c4656;border-radius:6px;padding:2px 8px}
+.pb-foot{display:flex;align-items:flex-end;justify-content:space-between;margin-top:12px}
+.pb-price b{font-size:20px;color:#e8562a}
+.pb-price small{color:#8a93a3;margin-left:3px}
+.pb-cta{background:var(--brand);color:#fff;font-weight:700;font-size:13px;border-radius:8px;padding:8px 14px}
+/* discovery (Google Maps business profile) */
+.pb-g{display:flex;gap:12px;padding:12px 14px}
+.pb-thumb{flex:none;width:72px;height:72px;border-radius:10px;background:linear-gradient(135deg,#e8eef9,#d4def2);display:grid;place-items:center;font-size:24px;color:#9aabcb}
+.pb-ginfo{min-width:0}
+.pb-ginfo h4{margin:0;font-size:16px;color:var(--brand)}
+.pb-stars{display:flex;align-items:center;gap:6px;margin-top:2px}
+.pb-stars span{color:#fbbc04;letter-spacing:1px;font-size:13px}
+.pb-stars small{font-size:12px}
+.pb-open{color:#1b7f45;font-size:12px;margin-top:4px}
+.pb-acts{display:flex;border-top:1px solid #eee}
+.pb-acts span{flex:1;text-align:center;padding:10px 4px;font-size:12px;color:var(--brand);border-left:1px solid #eee}
+.pb-acts span:first-child{border-left:0}
