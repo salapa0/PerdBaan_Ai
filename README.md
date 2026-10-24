@@ -19,7 +19,7 @@ commission and no per-listing charge.
 
 ## [Download the demo](https://github.com/salapa0/PerdBaan_Ai/archive/refs/heads/main.zip)
 
-**[Quick start](#quick-start)** · **[Turn on the live AI](#turn-on-the-live-ai-optional)** · **[Demo flow](#demo-flow-about-3-minutes)** · **[Pricing](pricing.html)** · **[Docs](#docs)**
+**[Quick start](#quick-start)** · **[Turn on the live AI](#turn-on-the-live-ai-optional)** · **[Demo flow](#demo-flow-about-3-minutes)** · **[Docs](#docs)**
 
 </div>
 
