@@ -6,6 +6,12 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "5173"],
       "port": 5173
+    },
+    {
+      "name": "demo-verify",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "5191"],
+      "port": 5191
     }
   ]
 }

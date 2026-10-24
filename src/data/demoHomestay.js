@@ -11,4 +11,6 @@ export const demoHomestay = {
   amenityOtherOn: false,
   amenityOther: '',
   features: 'อาหารเช้าพื้นเมือง บรรยากาศเงียบสงบ',
+  // Placeholder photos in public/demo-photos/ (swap for real ones with the same file names).
+  photos: ['01-front', '02-bedroom', '03-bathroom', '04-view', '05-food', '06-activity'].map(n => `public/demo-photos/${n}.jpg`),
 };

@@ -7,7 +7,7 @@
 | `router.js` | Which screen shows for each step, and what every button does |
 | `toolbar.js` | Hidden presenter toolbar and Shift shortcuts |
 | `config.js` | Product name, AI model tags, timeouts |
-| `photos.js` | Stores uploaded photos in the browser (IndexedDB) |
+| `photos.js` | Shrinks a photo the owner picked into a small JPEG kept in the app state |
 | `ui/` | Styles and shared pieces |
 | `screens/` | The owner's phone screens |
 | `console/` | The staff console |

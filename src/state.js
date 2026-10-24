@@ -5,7 +5,8 @@ export const clone = o => JSON.parse(JSON.stringify(o));
 const blankConn = () => ({ step: 1, coach: null, link: '', linkSent: false, live: false });
 const blank = () => ({
   step: 'chat', lang: 'th',
-  intake: { name: '', location: '', contact: { phone: '' }, totalRooms: 1, rooms: [], amenities: [], amenityOtherOn: false, amenityOther: '', features: '' },
+  intake: { name: '', location: '', contact: { phone: '' }, totalRooms: 1, rooms: [], amenities: [], amenityOtherOn: false, amenityOther: '', features: '', photos: [] },
+  photoIdx: 0,
   draft: null, source: '', busy: false, approved: false,
   hist: [], started: false, previewSent: false, menuOpen: true,
   customers: [],

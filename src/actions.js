@@ -10,6 +10,8 @@ import { buildCopyCards } from './rules/buildCopyCards.js';
 import { suggestPrice } from './rules/suggestPrice.js';
 import { getPlatform, platforms } from './data/platforms.js';
 import { toast } from './ui/dom.js';
+import { fileToPhoto } from './photos.js';
+import { MAX_PHOTOS } from './data/options.js';
 
 let ctl = null;
 // Sample guests used by simulateCustomer to demo an incoming enquiry/booking.
@@ -42,7 +44,7 @@ export const actions = {
     if (i == 0) go('form');
     else if (i == 1) s.previewSent ? go('preview') : toast('ยังไม่มีตัวอย่าง กรอกข้อมูลให้ AI เขียนประกาศก่อนนะคะ');
     else if (i == 2) s.approved ? go('connections') : toast('อนุมัติตัวอย่างประกาศก่อนนะคะ');
-    else if (i == 3) go('pricing');
+    else if (i == 3) { if (!s.approved) return toast('อนุมัติตัวอย่างประกาศก่อนนะคะ'); s.active = 'agoda'; const c = conn('agoda'); c.step = getPlatform('agoda').screens.length; c.coach = null; go('coach'); }
     else if (i == 4) go('finance');
     else go('help');
   },
@@ -62,7 +64,7 @@ export const actions = {
   },
   reset: () => resetState(),
   setLang: l => { state.lang = l; emit(); },
-  loadDemo() { state.intake = clone(demoHomestay); emit(); toast('โหลดบ้านตัวอย่างแล้ว'); },
+  loadDemo() { state.intake = clone(demoHomestay); state.photoIdx = 0; emit(); toast('โหลดบ้านตัวอย่างแล้ว'); },
   toggleMode() { state.mode = state.mode === 'live' ? 'saved' : 'live'; emit(); toast('โหมด AI: ' + (state.mode === 'live' ? 'Live' : 'Saved')); },
   stop() { ctl && ctl.abort(); },
   async warm() {
@@ -87,6 +89,18 @@ export const actions = {
     else i.amenities = i.amenities.includes(a) ? i.amenities.filter(x => x !== a) : [...i.amenities, a];
     emit();
   },
+  // Photos: the owner picks files (shrunk to small JPEGs); the first photo is the cover.
+  async addPhotos(files) {
+    const ph = state.intake.photos, room = MAX_PHOTOS - ph.length;
+    const imgs = [...files].filter(f => /^image\//.test(f.type));
+    if (!imgs.length) return toast('เลือกไฟล์รูปภาพเท่านั้นนะคะ');
+    if (room <= 0) return toast(`เพิ่มรูปได้ไม่เกิน ${MAX_PHOTOS} รูปค่ะ`);
+    const done = (await Promise.all(imgs.slice(0, room).map(f => fileToPhoto(f).catch(() => null)))).filter(Boolean);
+    const cur = state.intake.photos; cur.push(...done.slice(0, Math.max(0, MAX_PHOTOS - cur.length))); emit();
+    toast(!done.length ? 'เปิดรูปไม่ได้ ลองใช้ไฟล์ JPG หรือ PNG' : done.length < imgs.length ? `เพิ่มรูปได้ ${done.length} จาก ${imgs.length} รูป` : `เพิ่มรูปแล้ว ${done.length} รูป`);
+  },
+  removePhoto(k) { state.intake.photos.splice(+k, 1); state.photoIdx = 0; emit(); },
+  setPhoto(k) { state.photoIdx = +k; emit(); },
   editDraft: (k, v) => { state.draft[k] = v; },
   async write() {
     if (state.busy) return;
@@ -109,6 +123,10 @@ export const actions = {
     const b64 = await new Promise(r => { const f = new FileReader(); f.onload = () => r(String(f.result).split(',')[1]); f.readAsDataURL(file); });
     conn().coach = await coachScreenshot({ base64: b64, fileName: file.name }, buildCopyCards(state.draft, state.intake, state.active), conn().step, state.mode, state.active);
     emit();
+  },
+  copyLink(id) {
+    try { navigator.clipboard.writeText(conn(id).link); } catch { /* clipboard blocked */ }
+    toast('คัดลอกลิงก์แล้ว');
   },
   sendLink() { const c = conn(); if (getPlatform(state.active).link.check(c.link).ok) { c.linkSent = true; emit(); toast('ส่งลิงก์ให้เจ้าหน้าที่แล้ว'); } },
   // Staff console: simulate the active platform's approval/verification going through.

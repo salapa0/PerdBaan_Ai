@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>เปิดบ้าน · Perd Baan (demo)</title>
+  <title>เปิดบ้าน · Poet Baan (demo)</title>
   <link rel="preload" href="public/fonts/noto-sans-thai-thai-400-normal.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="public/fonts/noto-sans-thai-thai-700-normal.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="src/ui/app.css" />
@@ -44,22 +44,16 @@
       </div>
     </div>
 
-    <!-- Right: staff console (property-admin dashboard) -->
+    <!-- Right: staff console -->
     <aside id="console" class="console">
       <div class="console-head">
-        <div class="brand">
-          <div class="brand-mark">PB</div>
-          <div>
-            <div class="console-title">PoetBaan Partner Hub</div>
-            <div class="console-sub">Onboarding desk · <span id="console-owner">—</span></div>
-          </div>
+        <div>
+          <div class="console-title">Staff console</div>
+          <div class="console-sub" id="console-owner">—</div>
         </div>
         <div class="console-head-right">
-          <span class="env-badge">DEMO</span>
-          <span class="sysstat">
-            <span id="ollama-light" class="light light-red" title="AI engine status"></span>
-            <span id="ollama-label" class="light-label">Ollama</span>
-          </span>
+          <span id="ollama-light" class="light light-red" title="Ollama status"></span>
+          <span id="ollama-label" class="light-label">Ollama</span>
         </div>
       </div>
       <div id="console-body" class="console-body"></div>

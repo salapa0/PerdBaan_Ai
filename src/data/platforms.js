@@ -8,6 +8,13 @@ import { allAmenities } from './options.js';
 const agodaOk = url => /^(https?:\/\/)?(www\.)?agoda\.com\/[^\s/][^\s]*$/i.test((url || '').trim());
 const googleOk = url => /^(https?:\/\/)?(www\.)?(google\.[a-z.]+\/maps\/|maps\.app\.goo\.gl\/|goo\.gl\/maps\/|g\.page\/|business\.google\.[a-z.]+\/)[^\s]+$/i.test((url || '').trim());
 
+// Step 4 of every platform's sign-up is the photos page: the coach shows the photos from the owner's form.
+const photoCard = intake => {
+  const n = (intake.photos || []).length;
+  return { screen: 'photos', label: 'รูปภาพ', hintOnly: true,
+    value: n ? `อัปโหลดรูปที่กรอกไว้ ${n} รูปนี้ รูปแรกเป็นรูปปก` : 'ยังไม่ได้เพิ่มรูป กลับไปหน้ากรอกข้อมูลเพื่อเพิ่มอย่างน้อย 5 รูป' };
+};
+
 export const platforms = [
   {
     id: 'agoda', name: 'Agoda', short: 'Agoda', kind: 'booking',
@@ -19,6 +26,7 @@ export const platforms = [
       { screen: 'property',    title: 'ชื่อที่พัก',       field: 'Property name' },
       { screen: 'location',    title: 'ที่ตั้งและติดต่อ', field: 'Location & contact' },
       { screen: 'rooms',       title: 'ห้องพักและราคา',   field: 'Rooms & rates' },
+      { screen: 'photos',      title: 'รูปภาพ',           field: 'Photos' },
       { screen: 'description', title: 'คำอธิบายที่พัก',   field: 'Property description' },
     ],
     cards(draft, intake) {
@@ -29,6 +37,7 @@ export const platforms = [
       c.push({ screen: 'location', label: 'เบอร์โทร', value: intake.contact.phone });
       c.push({ screen: 'location', label: 'หมุดแผนที่', value: 'ปักหมุดตรงทางเข้าบ้านพัก', hintOnly: true });
       intake.rooms.forEach(r => c.push({ screen: 'rooms', label: `${r.name} (${r.count} ห้อง) ราคา/คืน`, value: String(r.price) }));
+      c.push(photoCard(intake));
       c.push({ screen: 'description', label: 'คำอธิบาย (EN)', value: draft.desc_en });
       c.push({ screen: 'description', label: 'คำอธิบาย (TH)', value: draft.desc_th });
       const am = allAmenities(intake);
@@ -42,11 +51,10 @@ export const platforms = [
       wait: 'ได้รับลิงก์แล้วค่ะ รอ Agoda อนุมัติ',
       check: url => ({ ok: agodaOk(url), msg: agodaOk(url) ? 'ลิงก์ถูกต้อง' : 'ต้องเป็นลิงก์หน้าที่พักบน agoda.com' }),
     },
-    liveMsg: name => `ประกาศของ ${name} ขึ้น Agoda แล้ว รับการจองได้เลยค่ะ`,
+    liveMsg: name => `🎉 ประกาศของ ${name} ขึ้น Agoda แล้ว รับการจองได้เลยค่ะ`,
+    // Lines on this channel's own announcement card in the chat (shown the moment the channel goes live).
+    announce: i => { const ps = i.rooms.map(r => +r.price).filter(Boolean); return [`ห้องพัก ${i.rooms.reduce((n, r) => n + (+r.count || 0), 0)} ห้อง${ps.length ? ` · เริ่ม ${Math.min(...ps)} บาท/คืน` : ''}`, 'รับการจองและชำระเงินผ่าน Agoda']; },
     sample: 'https://www.agoda.com/baan-suan-rim-nan/hotel/nan-th.html',
-    // How the listing banner looks on this channel — read by the "preview on each platform" page.
-    // kind 'booking' draws a search-result card (photo + price/night + book button).
-    preview: { brand: '#5392f9', wordmark: 'agoda', caption: 'ผลการค้นหา', cta: 'ดูห้องว่าง', priceNote: 'ต่อคืน' },
   },
   {
     id: 'google', name: 'Google Business Profile', short: 'Google', kind: 'discovery',
@@ -58,9 +66,9 @@ export const platforms = [
       { screen: 'name',     title: 'ชื่อธุรกิจ',           field: 'Business name' },
       { screen: 'category', title: 'หมวดหมู่ธุรกิจ',       field: 'Business category' },
       { screen: 'address',  title: 'ที่อยู่และหมุดแผนที่', field: 'Address & map pin' },
+      { screen: 'photos',   title: 'รูปภาพ',               field: 'Photos' },
       { screen: 'contact',  title: 'โทรศัพท์และเว็บไซต์',   field: 'Phone & website' },
       { screen: 'hours',    title: 'เวลาทำการ',            field: 'Opening hours' },
-      { screen: 'photos',   title: 'รูปภาพ',               field: 'Photos' },
     ],
     cards(draft, intake) {
       const c = [];
@@ -71,9 +79,9 @@ export const platforms = [
       c.push({ screen: 'category', label: 'หรือเลือก', value: 'Bed & breakfast' });
       c.push({ screen: 'address', label: 'ที่อยู่', value: intake.location });
       c.push({ screen: 'address', label: 'หมุดแผนที่', value: 'ลากหมุดให้ตรงทางเข้าบ้านพัก แขกใช้นำทาง', hintOnly: true });
+      c.push(photoCard(intake));
       c.push({ screen: 'contact', label: 'เบอร์โทร', value: intake.contact.phone });
       c.push({ screen: 'hours', label: 'เวลาเปิด–ปิด (เช็คอิน/เอาท์)', value: 'เช็คอิน 14:00 · เช็คเอาท์ 11:00 (ปรับได้)', hintOnly: true });
-      c.push({ screen: 'photos', label: 'รูปภาพ', value: 'อัปโหลดรูปบ้านพักอย่างน้อย 5 รูป', hintOnly: true });
       return c;
     },
     link: {
@@ -83,10 +91,9 @@ export const platforms = [
       wait: 'ได้รับลิงก์แล้วค่ะ รอ Google ยืนยันตัวตน',
       check: url => ({ ok: googleOk(url), msg: googleOk(url) ? 'ลิงก์ถูกต้อง' : 'ต้องเป็นลิงก์ Google Maps หรือโปรไฟล์ธุรกิจ (maps.app.goo.gl, g.page, google.com/maps)' }),
     },
-    liveMsg: name => `${name} ขึ้นบน Google Maps แล้ว ค้นเจอและรับรีวิวได้เลยค่ะ`,
+    liveMsg: name => `🎉 ${name} ขึ้นบน Google Maps แล้ว ค้นเจอและรับรีวิวได้เลยค่ะ`,
+    announce: i => [`📍 ${i.location}`, `📞 ${i.contact.phone}`],
     sample: 'https://maps.app.goo.gl/baan-suan-rim-nan',
-    // kind 'discovery' draws a Maps business-profile card (name + stars + call/directions/website).
-    preview: { brand: '#1a73e8', wordmark: 'Google', caption: 'โปรไฟล์ธุรกิจ บน Maps', category: 'เกสต์เฮาส์', actions: ['📞 โทร', '🧭 เส้นทาง', '🌐 เว็บไซต์'] },
   },
 ];
 
