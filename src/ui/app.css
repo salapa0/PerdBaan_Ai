@@ -1,11 +1,11 @@
-:root{--bg:#efeae0;--panel:#fffdf8;--ink:#23201a;--mute:#6f685b;--line:#ddd5c4;--g:#06c755;--gd:#04994a;--chat:#8fb2d6;--warn:#b26a00;--err:#c0392b;--ok:#1b7f45}
+:root{--page:#e4ddcd;--bg:#efeae0;--panel:#fffdf8;--ink:#23201a;--mute:#6f685b;--line:#ddd5c4;--g:#06c755;--gd:#04994a;--chat:#8fb2d6;--warn:#b26a00;--err:#c0392b;--ok:#1b7f45;--shadow:0 20px 50px -18px rgba(40,33,18,.45)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Noto Sans Thai","Sarabun",system-ui,sans-serif}
+body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 "Noto Sans Thai","Sarabun",system-ui,sans-serif}
 button,input,textarea{font:inherit;color:inherit}
 button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--g);outline-offset:1px}
 .stage{display:flex;gap:32px;justify-content:center;align-items:flex-start;padding:12px;min-height:100vh}
 .phone-col{flex:none;position:relative}
-.device{width:413px;height:872px;padding:10px;background:#111;border-radius:58px;position:relative;transform-origin:top left}
+.device{width:413px;height:872px;padding:10px;background:#111;border-radius:58px;position:relative;transform-origin:top left;box-shadow:var(--shadow)}
 .hw-btn{position:absolute;background:#111;width:4px;border-radius:2px}
 .hw-action{left:-3px;top:110px;height:30px}.hw-vol-up{left:-3px;top:170px;height:56px}.hw-vol-down{left:-3px;top:240px;height:56px}.hw-power{right:-3px;top:200px;height:90px}
 .phone{position:relative;width:393px;height:852px;background:var(--panel);border-radius:48px;overflow:hidden;display:flex;flex-direction:column}
@@ -19,8 +19,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 label{display:block;font-size:13px;color:var(--mute);margin-top:12px}
 input,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 10px}
 textarea{resize:vertical}
-.btn{display:block;width:100%;margin-top:8px;padding:12px;border:0;border-radius:12px;background:var(--g);color:#fff;font-weight:700;cursor:pointer}
-.btn:hover{background:var(--gd)}.btn:disabled{opacity:.45;cursor:default}
+.btn{display:block;width:100%;margin-top:8px;padding:13px;border:0;border-radius:12px;background:var(--g);color:#fff;font-weight:700;cursor:pointer;transition:background .12s,transform .05s}
+.btn:hover:not(:disabled){background:var(--gd)}.btn:active:not(:disabled){transform:translateY(1px)}.btn:disabled{opacity:.45;cursor:default}
 .btn.ghost{background:none;color:var(--ink);border:1px solid var(--line)}
 .tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;padding:8px;border:1px solid var(--line);border-radius:9px;background:none;cursor:pointer}.tabs .on{background:var(--ink);color:var(--panel)}
 .card{display:block;width:100%;text-align:left;margin:8px 0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);cursor:pointer}
@@ -68,9 +68,9 @@ textarea{resize:vertical}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
 .tile{border:0;background:#fff;padding:14px 4px;display:grid;gap:2px;justify-items:center;cursor:pointer;font-size:13px}
 .tile b{font-size:28px;font-weight:400;line-height:1.3}.tile.off{opacity:.45}.tile:active{background:#eaf9f0}
-.lbl{margin:16px 0 6px;font-size:13px;color:var(--mute)}
-.chipset{display:flex;flex-wrap:wrap;gap:6px}
-.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:6px 12px;font-size:14px;cursor:pointer}
+.lbl{margin:22px 0 8px;font-size:13px;font-weight:600;color:var(--mute)}
+.chipset{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:9px 14px;font-size:14px;cursor:pointer;transition:background .12s,border-color .12s}
 .chip.on{background:#e9fbf0;border-color:var(--g);color:#0a7f33;font-weight:700}
 .chip.on[data-a]::before{content:"✓ "}
 .rowline{display:flex;align-items:center;gap:8px}
@@ -78,7 +78,23 @@ textarea{resize:vertical}
 .stepper b{min-width:44px;text-align:center;font-size:18px}
 .stepper button{width:40px;height:40px;border:0;background:var(--bg);font-size:20px;cursor:pointer}
 .stepper.sm button{width:34px;height:34px}.stepper.sm b{min-width:34px;font-size:16px}
-.room{margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px}
+.room{margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
 .room .rowline{margin-top:8px}.room .price{width:84px}
 .rsum{margin:8px 0 0;font-size:14px}
-.plist{margin:8px 0;padding-left:20px}
+.plist{margin:0;padding-left:20px}
+.plist li{margin:2px 0}
+
+/* preview as a real listing card (ui/ux proposal) */
+.listing{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel);box-shadow:0 1px 4px rgba(40,33,18,.06)}
+.listing-head{padding:14px 16px;border-bottom:1px solid var(--line);background:#fbf9f3}
+.listing-head h3{margin:0 0 3px;font-size:19px;line-height:1.3}
+.listing-loc{color:var(--mute);font-size:13px}
+.listing-body{padding:14px 16px;display:flex;flex-direction:column;gap:14px}
+.listing-body p{margin:0}
+.price-badge{display:flex;align-items:baseline;gap:6px;background:#e9fbf0;border:1px solid #bdecce;border-radius:12px;padding:11px 14px}
+.price-badge b{font-size:23px;color:var(--gd);line-height:1}
+.price-badge .unit{font-size:13px;color:var(--mute)}
+.price-badge .rng{margin-left:auto;font-size:12px;color:var(--mute)}
+.plabel{margin:0 0 6px;font-size:12px;font-weight:600;color:var(--mute)}
+.listing .chip{cursor:default}
+.fine{font-size:12px}
