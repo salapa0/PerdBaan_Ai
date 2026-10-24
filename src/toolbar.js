@@ -5,7 +5,7 @@ import { $ } from './ui/dom.js';
 const JUMP = ['chat', 'form', 'review', 'preview', 'connections', 'coach', 'live'];
 const KEYS = {
   KeyL: ['Load demo', actions.loadDemo], KeyS: ['Live/Saved', actions.toggleMode], KeyF: ['Stop AI', actions.stop],
-  KeyW: ['Warm up', actions.warm], KeyA: ['Approve channel', actions.simulateAgoda], KeyR: ['Reset', actions.reset], KeyB: ['Back', actions.back],
+  KeyW: ['Warm up', actions.warm], KeyA: ['Approve channel', actions.simulateAgoda], KeyC: ['Customer ping', actions.simulateCustomer], KeyR: ['Reset', actions.reset], KeyB: ['Back', actions.back],
 };
 export function initToolbar() {
   const t = $('#toolbar');

@@ -7,12 +7,21 @@ import { generateDraft } from './ai/draft.js';
 import { coachScreenshot } from './ai/coach.js';
 import { askJson, ping } from './ai/ollama.js';
 import { buildCopyCards } from './rules/buildCopyCards.js';
+import { suggestPrice } from './rules/suggestPrice.js';
 import { getPlatform, platforms } from './data/platforms.js';
 import { toast } from './ui/dom.js';
 import { fileToPhoto } from './photos.js';
 import { MAX_PHOTOS } from './data/options.js';
 
 let ctl = null;
+// Sample guests used by simulateCustomer to demo an incoming enquiry/booking.
+const CUSTOMER_POOL = [
+  { name: 'คุณมานี', msg: 'สนใจห้องพักช่วงเสาร์–อาทิตย์นี้ ว่างไหมคะ', nights: 2 },
+  { name: 'คุณสมชาย', msg: 'ขอจอง 2 คืนครับ มีที่จอดรถไหม', nights: 2 },
+  { name: 'Emma', msg: 'Hi! Is the room available next weekend for 3 nights?', nights: 3 },
+  { name: 'คุณกานต์', msg: 'มากัน 4 คน พักคืนเดียว ราคาเท่าไรคะ', nights: 1 },
+  { name: '李伟', msg: '你好，下周有空房吗？住两晚', nights: 2 },
+];
 // With a single room type, its count simply follows the total number of rooms.
 const autoCount = () => { const rs = state.intake.rooms; if (rs.length === 1) rs[0].count = state.intake.totalRooms; };
 const go = s => {
@@ -36,8 +45,22 @@ export const actions = {
     else if (i == 1) s.previewSent ? go('preview') : toast('ยังไม่มีตัวอย่าง กรอกข้อมูลให้ AI เขียนประกาศก่อนนะคะ');
     else if (i == 2) s.approved ? go('connections') : toast('อนุมัติตัวอย่างประกาศก่อนนะคะ');
     else if (i == 3) { if (!s.approved) return toast('อนุมัติตัวอย่างประกาศก่อนนะคะ'); s.active = 'agoda'; const c = conn('agoda'); c.step = getPlatform('agoda').screens.length; c.coach = null; go('coach'); }
-    else if (i == 4) toast('แตะ "กรอกข้อมูล" เพื่อเริ่ม หรือพิมพ์ถามเจ้าหน้าที่ได้เลย');
-    else toast('เจ้าหน้าที่ตอบทุกวัน 9:00–18:00');
+    else if (i == 4) go('finance');
+    else go('help');
+  },
+  // ช่วยเหลือ / ติดต่อเจ้าหน้าที่: send a message to staff.
+  contactStaff() { toast('ส่งข้อความถึงเจ้าหน้าที่แล้ว ทีมงานจะตอบในแชทโดยเร็วค่ะ'); },
+  askStaff(topic) { toast(`ส่งคำถามเรื่อง “${topic}” ให้เจ้าหน้าที่แล้วค่ะ`); },
+  // Demo: a guest pings the owner. The first ping flips billing on (free until first customer).
+  simulateCustomer() {
+    const s = state;
+    const pick = CUSTOMER_POOL[s.customers.length % CUSTOMER_POOL.length];
+    const price = suggestPrice(s.intake).value || 800;
+    const now = new Date(), time = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const first = s.customers.length === 0;
+    s.customers.push({ name: pick.name, msg: pick.msg, nights: pick.nights, amount: pick.nights * price, time });
+    if (s.step !== 'chat') go('chat'); else emit();
+    toast(first ? '🎉 ลูกค้าคนแรกทักเข้ามาแล้ว!' : `🔔 ${pick.name} ส่งข้อความถึงคุณ`);
   },
   reset: () => resetState(),
   setLang: l => { state.lang = l; emit(); },

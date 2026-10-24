@@ -42,6 +42,8 @@ export function renderConsole() {
         + `<button class="btn" data-a="simulateAgoda" ${c.linkSent && !c.live ? '' : 'disabled'}>${esc(p.verify.btn)} (Shift+A)</button>` + connLines();
     }
     else h += connLines() + `<button class="btn ghost" data-a="reset">Reset (Shift+R)</button>`;
+    if (s.customers.length) h += `<p class="muted">ลูกค้าทัก: ${s.customers.length} ราย · รายได้รวม ${s.customers.reduce((n, c) => n + c.amount, 0)}฿</p>`;
+    h += `<button class="btn ghost" data-a="simulateCustomer">Simulate guest ping (Shift+C)</button>`;
   }
   $('#console-body').innerHTML = h; renderChecks();
 }

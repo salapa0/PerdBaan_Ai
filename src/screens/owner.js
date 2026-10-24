@@ -11,6 +11,7 @@ export const HEAD = {
   chat: ['line'], review: ['line'], live: ['line'],
   form: ['liff', 'กรอกข้อมูลบ้านพัก'], writing: ['liff', 'AI กำลังเขียน'], preview: ['liff', 'ดูตัวอย่างประกาศ'],
   connections: ['liff', 'การเชื่อมต่อ'], coach: ['liff', 'สมัครช่องทาง'],
+  finance: ['liff', 'การเงิน'], help: ['liff', 'ติดต่อเจ้าหน้าที่'],
 };
 export const isChat = st => HEAD[st][0] === 'line';
 const canBack = () => state.step !== 'writing' && (state.hist.length > 0 || (state.step === 'coach' && conn().step > 1));
@@ -27,6 +28,8 @@ const T = '9:41';
 const bot = h => `<div class="row"><span class="av">เ</span><div class="bub">${h}</div><time>${T}</time></div>`;
 const me = h => `<div class="row me"><time>อ่านแล้ว ${T}</time><div class="bub me">${h}</div></div>`;
 const fx = (txt, label, v) => `<div class="row"><span class="av">เ</span><div class="bub fx"><p>${txt}</p><button data-a="go" data-v="${v}">${label}</button></div></div>`;
+// An incoming message from a (simulated) guest — a different person from the "เปิดบ้าน" bot.
+const cust = (name, h) => `<div class="row"><span class="av cust" aria-hidden="true">${esc(name.slice(0, 1))}</span><div class="bub cust"><small class="cust-name">${esc(name)}</small>${h}</div></div>`;
 
 function chatHtml() {
   const s = state; let h = '<div class="date">วันนี้</div>';
@@ -39,6 +42,10 @@ function chatHtml() {
   platforms.forEach(p => { if (conn(p.id).live) h += bot(p.liveMsg(esc(s.intake.name))) + announceCard(p); });
   const pending = s.approved ? platforms.filter(p => !conn(p.id).live) : [];
   if (platforms.some(p => conn(p.id).live) && pending.length) h += fx(`เพิ่มช่องทาง ${esc(pending[0].short || pending[0].name)} ได้อีกนะคะ`, 'เพิ่มการเชื่อมต่อ', 'connections');
+  if (s.customers.length) {
+    s.customers.forEach(c => h += cust(c.name, esc(c.msg)));
+    h += fx(`🎉 มีลูกค้าทักเข้ามา ${s.customers.length} ราย — ดูสรุปการเงินได้เลย`, 'ไปที่หน้าการเงิน', 'finance');
+  }
   if (!s.draft) h += `<div class="chips"><button data-a="go" data-v="form">${s.started ? 'กรอกข้อมูลต่อ' : 'เริ่มเลย'}</button></div>`;
   return h;
 }
@@ -54,7 +61,8 @@ function announceCard(p) {
 }
 
 // ---- rich menu grid (bottom of the chat) ----
-const TILES = [['📝', 'กรอกข้อมูล'], ['👀', 'ดูตัวอย่าง'], ['🔗', 'การเชื่อมต่อ'], ['📷', 'ถามเรื่อง Agoda'], ['❓', 'ช่วยเหลือ'], ['📞', 'คุยกับเจ้าหน้าที่']];
+// 3×2 grid. Bottom row: ถามเรื่อง Agoda · การเงิน (middle) · ช่วยเหลือ (right, opens ติดต่อเจ้าหน้าที่).
+const TILES = [['📝', 'กรอกข้อมูล'], ['👀', 'ดูตัวอย่าง'], ['🔗', 'การเชื่อมต่อ'], ['📷', 'ถามเรื่อง Agoda'], ['💵', 'การเงิน'], ['💬', 'ช่วยเหลือ']];
 function menuHtml() {
   const s = state, on = [true, s.previewSent, s.approved, s.approved, true, true];
   return `<button class="menubar" data-a="toggleMenu" aria-expanded="${s.menuOpen}"><span>เมนู</span><i class="chev ${s.menuOpen ? 'dn' : 'up'}"></i></button>`
@@ -86,7 +94,47 @@ export function screenHtml() {
     }
     case 'connections': return connectionsHtml();
     case 'coach': return coachHtml();
+    case 'finance': return financeHtml();
+    case 'help': return helpHtml();
   }
+}
+
+// ---- Finance: billing status + a running summary of bookings from (simulated) guests ----
+// Free until the first customer; the first guest ping flips billing on and starts the earnings tally.
+function financeHtml() {
+  const cs = state.customers, has = cs.length > 0;
+  const nights = cs.reduce((n, c) => n + c.nights, 0);
+  const gross = cs.reduce((n, c) => n + c.amount, 0);
+  const row = (label, val, cls = '') => `<div class="fin-row"><span>${esc(label)}</span><b class="${cls}">${val}</b></div>`;
+  return `<p class="big center">${has ? 'สรุปการเงิน' : 'ฟรีจนกว่าจะได้ลูกค้าคนแรก'}</p>`
+    + (has
+        ? `<div class="note"><b>เริ่มแพ็กเกจ Standard · ฿490/เดือน</b><br>คุณได้ลูกค้าคนแรกแล้ว 🎉 ค่าสมาชิกจะเริ่มในรอบบิลถัดไป (ขั้นต่ำ 6 เดือน)</div>`
+        : `<div class="note"><b>ยังไม่มีค่าใช้จ่าย</b><br>ลงประกาศได้เต็มที่ ยังไม่ต้องจ่ายจนกว่าจะมีลูกค้าคนแรกเข้ามา</div>`)
+    + `<p class="lbl">ยอดจองจากลูกค้า</p>`
+    + `<div class="agoda">`
+    + row('จำนวนการจอง', `${cs.length} ราย`)
+    + row('จำนวนคืน', `${nights} คืน`)
+    + row('รายได้รวม (ประมาณ)', `฿${gross.toLocaleString('en-US')}`, 'ok')
+    + `</div>`
+    + (has
+        ? `<p class="lbl">ลูกค้าล่าสุด</p>`
+          + cs.slice().reverse().map(c =>
+              `<div class="agoda"><small>${esc(c.time)}</small><b>${esc(c.name)}</b>`
+              + `<p class="muted">${esc(c.msg)}</p>`
+              + `<p class="ok fine">${c.nights} คืน · ฿${c.amount.toLocaleString('en-US')}</p></div>`).join('')
+        : `<p class="muted center">ยังไม่มีการจอง — เมื่อมีลูกค้าทักเข้ามา ยอดจะแสดงที่นี่</p>`)
+    + `<p class="ok fine center">✓ ไม่หักค่าคอมมิชชัน · เงินทุกบาทเป็นของคุณ</p>`;
+}
+
+// ---- Help: the "ติดต่อเจ้าหน้าที่" feature, now reached from the ช่วยเหลือ tile ----
+function helpHtml() {
+  const q = (label, v) => `<button class="chip" data-a="askStaff" data-v="${esc(v)}">${esc(label)}</button>`;
+  return `<p class="big center">ติดต่อเจ้าหน้าที่</p>`
+    + `<p class="muted center">ทีมงานเปิดบ้านพร้อมช่วยคุณทุกขั้นตอน</p>`
+    + `<div class="agoda"><small>เวลาทำการ</small><b>ทุกวัน 9:00–18:00 น.</b><p class="muted">ตอบในแชทไลน์นี้ โดยเฉลี่ยภายใน 1 ชั่วโมง</p></div>`
+    + `<div class="agoda"><small>สายด่วน</small><b>02-123-4567</b><p class="muted">สายด่วนช่วยเหลือเจ้าของบ้านพัก</p></div>`
+    + `<p class="lbl">คำถามที่พบบ่อย</p>`
+    + `<div class="chipset">${q('สมัครช่องทางยังไง', 'การสมัครช่องทาง')}${q('ค่าบริการเท่าไร', 'ค่าบริการ')}${q('แก้ไขประกาศ', 'การแก้ไขประกาศ')}</div>`;
 }
 
 // ---- Connections: one card per platform, rendered from platforms.js ----
@@ -138,6 +186,8 @@ export function dockHtml() {
     case 'form': return btn('ให้ AI เขียนประกาศ', 'write', '', !formValid()) + btn('ใช้บ้านตัวอย่าง', 'loadDemo', '', false, 'ghost');
     case 'preview': return s.approved ? btn('กลับไปที่แชท', 'close') : btn('อนุมัติ', 'approveOwner');
     case 'connections': return '';
+    case 'finance': return '';
+    case 'help': return btn('ส่งข้อความหาเจ้าหน้าที่', 'contactStaff');
     case 'coach': {
       const p = getPlatform(s.active), c = conn(), n = p.screens.length;
       return c.step <= n ? btn('ถัดไป', 'nextCoach') : btn('ส่งลิงก์', 'sendLink', '', !p.link.check(c.link).ok || c.linkSent);

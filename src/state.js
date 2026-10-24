@@ -9,6 +9,7 @@ const blank = () => ({
   photoIdx: 0,
   draft: null, source: '', busy: false, approved: false,
   hist: [], started: false, previewSent: false, menuOpen: true,
+  customers: [],
   active: platforms[0].id,
   conns: Object.fromEntries(platforms.map(p => [p.id, blankConn()])),
   mode: config.defaultMode, ollama: false,
