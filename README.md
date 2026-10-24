@@ -1,35 +1,88 @@
-# เปิดบ้าน (Poet Baan): AI helps rural homestays get listed on Agoda
+<div align="center">
 
-Homestay owners fill a short guided form inside LINE. AI writes their listing in Thai, English and Chinese, staff check it, and an AI coach walks the owner through Agoda's sign-up until the listing is live. We take no bookings, payments or commission.
+# เปิดบ้าน · Poet Baan
 
-Competition prototype. Runs fully on one laptop, offline: no server, no cloud AI, no cost.
+### AI helps rural homestays get listed on Agoda — in Thai, English & Chinese
 
-## Run it
+Homestay owners fill a short guided form inside LINE. AI writes their listing in three
+languages, staff check it, and an AI coach walks the owner through Agoda's sign-up until the
+listing is live. **No bookings, no payments, no commission.**
 
-Needs Python 3. Double-click **`start-demo.bat`** (Windows), or from this folder:
+![Runs offline](https://img.shields.io/badge/runs-100%25%20offline-2ea44f)
+![Cloud AI](https://img.shields.io/badge/cloud%20AI-none-informational)
+![Cost](https://img.shields.io/badge/cost-%240-brightgreen)
+![Languages](https://img.shields.io/badge/listing-TH%20%2F%20EN%20%2F%20%E4%B8%AD%E6%96%87-orange)
+![Platform](https://img.shields.io/badge/runs%20on-one%20laptop-lightgrey)
+
+<img src="docs/images/hero.jpg" alt="The owner's phone shows the AI-written listing in Thai, English and Chinese; the staff console shows every check passed" width="820">
+
+## [⬇️ &nbsp; Download the demo](https://github.com/salapa0/PerdBaan_Ai/archive/refs/heads/main.zip)
+
+**[Quick start](#-quick-start)** · **[Turn on the live AI](#-turn-on-the-live-ai-optional)** · **[Demo flow](#-demo-flow-about-3-minutes)** · **[Docs](#-docs)**
+
+</div>
+
+---
+
+## ✨ What it does
+
+- 📝 **Guided form in LINE** — the owner answers a few friendly questions on their phone; no typing a listing from scratch.
+- 🌏 **AI writes the listing in 3 languages** — Thai, English and Chinese, ready to paste into Agoda.
+- ✅ **Staff review console** — every listing is checked and editable before it goes out.
+- 🤝 **AI sign-up coach** — walks the owner through Agoda's real sign-up, step by step, and reads screenshots to point at the right button.
+- 🔌 **Offline by design** — runs fully on one laptop. Works even with no AI installed: every AI step falls back to a saved answer.
+
+---
+
+## 🖥️ Requirements
+
+You install just **two things** — the demo, and (optionally) the local AI. Everything else is built in.
+
+| For | You need | Where to get it |
+| --- | --- | --- |
+| The demo (required) | Python 3 | https://www.python.org/downloads/ — tick **Add Python to PATH** during install |
+| Live AI (optional) | Ollama + about 11 GB free RAM | https://ollama.com |
+
+Without the live AI the demo still runs end to end: every AI step falls back to a saved answer, and the staff console shows **Live AI** or **Saved (cached)** for each result.
+
+---
+
+## 🚀 Quick start
+
+**1. Get the demo** — click **[⬇️ Download the demo](https://github.com/salapa0/PerdBaan_Ai/archive/refs/heads/main.zip)** and unzip it (or `git clone https://github.com/salapa0/PerdBaan_Ai.git`).
+
+**2. Run it** — double-click **`start-demo.bat`** (Windows). It starts the local server and opens Chrome at **http://localhost:5173**.
+
+On Mac / Linux, run this from the project folder, then open **http://localhost:5173** in Chrome:
 
 ```
-python -m http.server 5173
+python3 -m http.server 5173
 ```
 
-Open **http://localhost:5173** in Chrome. Do not double-click `index.html`; the app needs the local server.
+> Don't double-click `index.html` — the app needs the local server to load its files.
 
-The demo works without any AI installed: every AI step falls back to a saved answer. The staff console always shows whether a result came from **Live AI** or **Saved (cached)**.
+That's it; the demo is fully usable now. The next step is optional.
 
-## Turn on the live AI (optional)
+---
 
-1. Install Ollama from https://ollama.com
-2. Run **`setup-ollama.bat`**. It allows the page to talk to Ollama (`OLLAMA_ORIGINS`) and downloads the two models (several GB, do it ahead of time).
-3. Quit Ollama from the tray and start it again, then reload the page. The console's Ollama light turns green.
+## 🤖 Turn on the live AI (optional)
 
-| Model | Job | Tag (set in `src/config.js`) |
+Do this only if you want to watch the AI generate live instead of using saved answers.
+
+1. Install Ollama from https://ollama.com and start it.
+2. Run **`setup-ollama.bat`**. It lets the page talk to Ollama (`OLLAMA_ORIGINS`) and downloads the two models below (several GB — do this ahead of time).
+3. Quit Ollama from the tray, start it again, then reload the page. The console's **Ollama** light turns green.
+
+| Model | Job | Tag |
 | --- | --- | --- |
 | Typhoon 8B (SCB 10X) | Thai + English listing | `hf.co/scb10x/llama-3-typhoon-v1.5-8b-instruct-gguf` |
 | Qwen2.5-VL 7B | Chinese translation, reading Agoda screenshots | `qwen2.5vl:7b` (use `:3b` if it feels slow) |
 
-Together they need about 11 GB of RAM.
+The default tags are already set in `src/config.js`, so there's nothing to edit unless you pull a different size (e.g. `:3b`). Together the models need about 11 GB of RAM.
 
-## Demo flow (about 3 minutes)
+---
+
+## 🎬 Demo flow (about 3 minutes)
 
 1. **Shift+R** to reset. Tap **เริ่มเลย** in the chat (or the **กรอกข้อมูล** tile in the menu grid at the bottom). Every page has a back arrow (top left).
 2. **Shift+L** loads the demo homestay. Submit with **ให้ AI เขียนประกาศ**.
@@ -38,7 +91,8 @@ Together they need about 11 GB of RAM.
 5. **ไปที่หน้าการเชื่อมต่อ** → **เพิ่มการเชื่อมต่อ** → follow the coach. At step 4, send a screenshot: the AI explains the page in Thai and highlights which card to copy.
 6. Paste the sample link, then **Shift+A** to show the listing going live.
 
-### Presenter shortcuts
+<details>
+<summary><b>Presenter shortcuts</b></summary>
 
 **Shift+D** shows a hidden toolbar with the same controls. Shortcuts are ignored while typing in a field.
 
@@ -54,7 +108,28 @@ Together they need about 11 GB of RAM.
 | Shift+B | Back one page |
 | Shift+R | Reset everything |
 
-## Project layout
+</details>
+
+---
+
+## 🧩 What is simulated
+
+Agoda itself (screenshots and a "simulate approval" key; the real site is never automated), ID and bank-book checks (shown ticked), the map pin, and LINE itself (the phone is a web page styled like LINE). Not built: real LINE Official Account integration, servers, logins, booking alerts, billing.
+
+---
+
+## 📚 Docs
+
+- [Project baseline](docs/project-baseline.md): the whole project in one place
+- [Demo MVP scope](docs/demo-mvp-scope-local.md): what is built, faked and left out
+- [Prototype build spec](docs/prototype-build-spec.md): stack and build details
+
+---
+
+<details>
+<summary><b>🛠️ For contributors & maintainers</b></summary>
+
+### Project layout
 
 | Path | What it is |
 | --- | --- |
@@ -72,27 +147,15 @@ Together they need about 11 GB of RAM.
 | `docs/` | Decisions and specs |
 | `test.html` | Logic self-tests: open http://localhost:5173/test.html |
 
-## Saving your work (GitHub Desktop)
+### Saving your work
 
-1. **Fetch origin**, then **Pull origin** if it appears, before you start.
-2. Make your changes. They show in the **Changes** tab.
-3. Write a short summary, click **Commit to main**, then **Push origin**.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the GitHub Desktop flow, handling conflicts, and what not to commit.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for conflicts and what not to commit.
-
-## Before demo day
+### Before demo day
 
 - [ ] Replace the simulated sign-up screens in `public/agoda/` with real captured Agoda screens (`agoda-01.png` … `agoda-08.png`), then set `agodaScreenExt: 'png'` in `src/config.js`.
 - [ ] Regenerate `src/data/savedDraft.js` with the real local models (best of 3 runs, fix any Thai / Chinese errors).
 - [ ] Swap the illustrated demo photos in `public/demo-photos/` for real ones (same file names, under 500 KB each).
 - [ ] Run the full demo once with Wi-Fi off, and record a backup video.
 
-## What is simulated
-
-Agoda itself (screenshots and a "simulate approval" key; the real site is never automated), ID and bank-book checks (shown ticked), the map pin, and LINE itself (the phone is a web page styled like LINE). Not built: real LINE Official Account integration, servers, logins, booking alerts, billing.
-
-## Docs
-
-- [Project baseline](docs/project-baseline.md): the whole project in one place
-- [Demo MVP scope](docs/demo-mvp-scope-local.md): what is built, faked and left out
-- [Prototype build spec](docs/prototype-build-spec.md): stack and build details
+</details>
