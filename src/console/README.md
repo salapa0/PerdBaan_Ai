@@ -1,6 +1,3 @@
-# src/console: the staff screen
+# src/console: the staff console
 
-**What goes here:** the screen on the right side of the page, used by our staff. It shows the AI draft and any check warnings, lets staff edit the text, and has the "Approve & send preview" button. One draft only, no queue, no login.
-
-**Who:** B (AI and logic).
-**Not here:** the owner's phone screens (`src/screens/`).
+The right-hand pane. Shows the owner's form, the AI draft in TH / EN / ZH with editing, the check results, and the **Approve & send preview** button. Also shows the Agoda connection status and every screenshot the owner sent to the coach.
