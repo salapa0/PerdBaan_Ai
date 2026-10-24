@@ -6,7 +6,6 @@ import { savedDraft } from './data/savedDraft.js';
 import { generateDraft } from './ai/draft.js';
 import { coachScreenshot } from './ai/coach.js';
 import { askJson, ping } from './ai/ollama.js';
-import { runChecks } from './rules/runChecks.js';
 import { buildCopyCards } from './rules/buildCopyCards.js';
 import { checkAgodaLink } from './rules/checkAgodaLink.js';
 import { toast } from './ui/dom.js';
@@ -32,7 +31,7 @@ export const actions = {
   menu(i) {
     const s = state;
     if (i == 0) go('form');
-    else if (i == 1) s.previewSent ? go('preview') : toast('ยังไม่มีตัวอย่าง เจ้าหน้าที่กำลังตรวจอยู่');
+    else if (i == 1) s.previewSent ? go('preview') : toast('ยังไม่มีตัวอย่าง กรอกข้อมูลให้ AI เขียนประกาศก่อนนะคะ');
     else if (i == 2) s.approved ? go('connections') : toast('อนุมัติตัวอย่างประกาศก่อนนะคะ');
     else if (i == 3) { if (!s.approved) return toast('อนุมัติตัวอย่างประกาศก่อนนะคะ'); s.coachStep = 4; s.coach = null; go('coach'); }
     else if (i == 4) toast('แตะ "กรอกข้อมูล" เพื่อเริ่ม หรือพิมพ์ถามเจ้าหน้าที่ได้เลย');
@@ -71,11 +70,8 @@ export const actions = {
     state.busy = true; go('writing');
     ctl = new AbortController();
     const r = await generateDraft(state.intake, state.mode, ctl.signal);
-    Object.assign(state, { draft: r.draft, source: r.source, busy: false, step: 'review' }); emit();
-  },
-  approvePreview() {
-    if (!state.draft || runChecks(state.draft, state.intake).some(f => f.level === 'error')) return toast('แก้รายการสีแดงก่อน');
-    state.previewSent = true; emit(); toast('ส่งตัวอย่างให้เจ้าของแล้ว');
+    // No staff review: the AI draft goes straight to the owner, who is the only approver.
+    Object.assign(state, { draft: r.draft, source: r.source, busy: false, previewSent: true, step: 'preview' }); emit();
   },
   approveOwner() { state.approved = true; go('chat'); },
   nextCoach() { state.coachStep = Math.min(5, state.coachStep + 1); state.coach = null; emit(); },
@@ -96,7 +92,7 @@ export const actions = {
     if (!state.intake.name) state.intake = clone(demoHomestay);
     if (n < 2) state.draft = null;
     else if (!state.draft) { state.draft = clone(savedDraft); state.source = 'Saved (cached)'; }
-    Object.assign(state, { hist: J.slice(0, n), started: n >= 1, previewSent: n >= 3, approved: n >= 4, coachStep: 1, coach: null, lang: 'th', linkSent: step === 'live', step });
+    Object.assign(state, { hist: J.slice(0, n), started: n >= 1, previewSent: n >= 2, approved: n >= 4, coachStep: 1, coach: null, lang: 'th', linkSent: step === 'live', step });
     if (step === 'live') state.link = 'https://www.agoda.com/baan-suan-rim-nan/hotel/nan-th.html';
     emit();
   },
