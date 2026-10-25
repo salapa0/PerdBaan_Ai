@@ -4,5 +4,5 @@ export const config = {
   textModel: 'hf.co/scb10x/llama-3-typhoon-v1.5-8b-instruct-gguf',
   visionModel: 'qwen2.5vl:7b', // use qwen2.5vl:3b if it feels slow
   agodaScreenExt: 'png',
-  defaultMode: 'live', // 'saved' | 'live'
+  defaultMode: 'saved', // 'saved' | 'live'
 };
