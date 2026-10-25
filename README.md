@@ -185,3 +185,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the GitHub Desktop flow, handling con
 - [ ] Run the full demo once with Wi-Fi off, and record a backup video.
 
 </details>
+
+---
+
+## 📄 License
+
+[MIT](LICENSE). The bundled Noto Sans Thai fonts in `public/fonts/` keep their own license, the SIL Open Font License ([`OFL-LICENSE.txt`](public/fonts/OFL-LICENSE.txt)).
