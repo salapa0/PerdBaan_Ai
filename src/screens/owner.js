@@ -11,7 +11,7 @@ export const HEAD = {
   chat: ['line'], review: ['line'], live: ['line'],
   form: ['liff', 'กรอกข้อมูลบ้านพัก'], writing: ['liff', 'AI กำลังเขียนประกาศ'], preview: ['liff', 'ดูตัวอย่างประกาศ'],
   connections: ['liff', 'การเชื่อมต่อ'], coach: ['liff', 'สมัครช่องทาง'],
-  finance: ['liff', 'การเงิน'], help: ['liff', 'ติดต่อเจ้าหน้าที่'],
+  pricing: ['liff', 'ราคาและแพ็กเกจ'], finance: ['liff', 'การเงิน'], help: ['liff', 'ติดต่อเจ้าหน้าที่'],
 };
 export const isChat = st => HEAD[st][0] === 'line';
 const canBack = () => state.step !== 'writing' && (state.hist.length > 0 || (state.step === 'coach' && conn().step > 1));
@@ -54,6 +54,7 @@ function chatHtml() {
     const ok = s.customers.filter(c => c.confirmed).length;
     if (ok) h += fx(`🎉 ยืนยันการจองจริงแล้ว ${ok} ราย ดูสรุปการเงินได้เลยค่ะ`, 'ไปที่หน้าการเงิน', 'finance');
   }
+  if (!s.draft) h += fx('อยากรู้ค่าบริการใช่ไหมคะ ใช้ฟรีจนกว่าจะได้ลูกค้าคนแรกค่ะ', 'ดูราคาและแพ็กเกจ', 'pricing');
   if (!s.draft) h += `<div class="chips"><button data-a="go" data-v="form">${s.started ? 'กรอกข้อมูลต่อ' : 'เริ่มเลย'}</button></div>`;
   return h;
 }
@@ -69,10 +70,11 @@ function announceCard(p) {
 }
 
 // ---- rich menu grid (bottom of the chat) ----
-// 3×2 grid. Bottom row: ถามเรื่อง Agoda · การเงิน (middle) · ช่วยเหลือ (right, opens ติดต่อเจ้าหน้าที่).
-const TILES = [['📝', 'กรอกข้อมูล'], ['👀', 'ดูตัวอย่าง'], ['🔗', 'การเชื่อมต่อ'], ['📷', 'ถามเรื่อง Agoda'], ['💵', 'การเงิน'], ['💬', 'ช่วยเหลือ']];
+// 3×2 grid. การเชื่อมต่อ/สมัคร covers sign-up too (the coach is reached from the Connections page).
+// Bottom row: ราคา/แพ็กเกจ · การเงิน (middle) · ช่วยเหลือ (right, opens ติดต่อเจ้าหน้าที่).
+const TILES = [['📝', 'กรอกข้อมูล'], ['👀', 'ดูตัวอย่าง'], ['🔗', 'การเชื่อมต่อ/สมัคร'], ['💰', 'ราคา/แพ็กเกจ'], ['💵', 'การเงิน'], ['💬', 'ช่วยเหลือ']];
 function menuHtml() {
-  const s = state, on = [true, s.previewSent, s.approved, s.approved, true, true];
+  const s = state, on = [true, s.previewSent, s.approved, true, true, true];
   return `<button class="menubar" data-a="toggleMenu" aria-expanded="${s.menuOpen}"><span>เมนู</span><i class="chev ${s.menuOpen ? 'dn' : 'up'}"></i></button>`
     + (s.menuOpen ? `<div class="grid">${TILES.map(([e, l], i) => `<button class="tile ${on[i] ? '' : 'off'}" data-a="menu" data-v="${i}"><b aria-hidden="true">${e}</b><span>${l}</span></button>`).join('')}</div>` : '');
 }
@@ -102,9 +104,42 @@ export function screenHtml() {
     }
     case 'connections': return connectionsHtml();
     case 'coach': return coachHtml();
+    case 'pricing': return pricingHtml();
     case 'finance': return financeHtml();
     case 'help': return helpHtml();
   }
+}
+
+// ---- Pricing & packages (free until the owner's first customer) ----
+function pricingHtml() {
+  const plan = (name, who, price, unit, setup, feats, hot) =>
+    `<div class="agoda${hot ? ' pr-hot' : ''}"><small>${who}</small>`
+    + `<b>${name}${hot ? ' <span class="tag tag-live">แนะนำ</span>' : ''}</b>`
+    + `<p class="pr-row"><span class="pr-amt">${price} บาท</span><span class="muted"> / ${unit}</span></p>`
+    + `<p class="muted fine">${setup}</p>`
+    + `<ul class="plist">${feats.map(f => `<li>${f}</li>`).join('')}</ul></div>`;
+
+  return `<p class="big center">ฟรีจนกว่าคุณจะได้ลูกค้าคนแรก</p>`
+    + `<p class="muted center">ลงประกาศบนแพลตฟอร์มท่องเที่ยว ทั้ง Agoda และ Google Business Profile ได้เลย ยังไม่ต้องชำระเงินจนกว่าจะมีลูกค้าคนแรกเข้ามาค่ะ</p>`
+    + `<div class="note"><b>ข้อเสนอเริ่มต้น · ชำระเงินเมื่อได้ลูกค้าคนแรก</b><br>`
+    + `ไม่มีค่าติดตั้ง · ฟรี 100% จนกว่าจะได้ลูกค้าคนแรก จากนั้นเริ่มค่าบริการรายเดือนเพียง 490 บาท/เดือน (แผน Standard) · ขั้นต่ำ 6 เดือน</div>`
+    + `<p class="lbl">เลือกแพ็กเกจ</p>`
+    + plan('Starter', 'เริ่มแบบเบาที่สุด', '290', 'เดือน', 'ค่าติดตั้ง 1,500 บาท',
+        ['ประกาศ 3 ภาษา ลงได้ทุกแพลตฟอร์ม', 'ทีมงานตรวจประกาศก่อนส่ง', 'ผู้ช่วย AI พาสมัครแต่ละแพลตฟอร์ม'])
+    + plan('Standard', 'แผนหลัก คุ้มที่สุดสำหรับโฮมสเตย์ทั่วไป', '490', 'เดือน', 'ค่าติดตั้ง 2,500 บาท (ยกเว้นในข้อเสนอเริ่มต้น)',
+        ['ทุกอย่างในแผน Starter', 'ปรับแต่งรูปและคำบรรยายด้วย AI', 'ตรวจลิงก์ประกาศว่ายังออนไลน์', 'เริ่มชำระเงินหลังได้ลูกค้าคนแรก'], true)
+    + plan('Community', 'สำหรับหมู่บ้าน 10 หลังขึ้นไป', '390', 'เดือน/หลัง', '15,000 บาทต่อหมู่บ้าน',
+        ['ทุกอย่างในแผน Standard', 'ดูแลทั้งหมู่บ้านในที่เดียว', 'รองรับผู้สนับสนุน (จังหวัด/DASTA/OTOP)'])
+    + `<div class="note">💡 490 บาท/เดือน ถูกกว่าห้องที่ขายเพิ่มได้แค่คืนเดียวบน Agoda ที่เหลือเป็นกำไรของคุณค่ะ</div>`
+    + `<p class="lbl">ทุกแพ็กเกจรวม</p>`
+    + `<ul class="plist">`
+    + `<li>กรอกข้อมูลง่าย ๆ ในไลน์</li>`
+    + `<li>AI เขียนประกาศ 3 ภาษา (ไทย / อังกฤษ / 中文)</li>`
+    + `<li>ทีมงานตรวจทุกประกาศก่อนส่งออกจริง</li>`
+    + `<li>ผู้ช่วย AI พาสมัครแต่ละแพลตฟอร์มทีละขั้น</li>`
+    + `</ul>`
+    + `<p class="ok fine">✓ ไม่หักค่าคอมมิชชัน · ไม่มีค่าธรรมเนียมการจอง · คุณเป็นเจ้าของบัญชีแพลตฟอร์มเอง</p>`
+    + `<p class="muted fine">ชำระรายปีล่วงหน้า: ชำระ 10 เดือน ใช้ได้ 12 เดือน · บริการเสริม: ถ่ายภาพ 1,500 บาท · วิดีโอรีล 990 บาท</p>`;
 }
 
 // ---- Finance: billing status + a running summary of confirmed bookings ----
@@ -197,6 +232,7 @@ export function dockHtml() {
     case 'form': return btn('ให้ AI เขียนประกาศ', 'write', '', !formValid()) + btn('ใช้บ้านตัวอย่าง', 'loadDemo', '', false, 'ghost');
     case 'preview': return s.approved ? btn('กลับไปที่แชท', 'close') : btn('อนุมัติ', 'approveOwner');
     case 'connections': return '';
+    case 'pricing': return btn('เริ่มกรอกข้อมูลฟรี', 'go', 'form') + btn('ติดต่อเจ้าหน้าที่', 'menu', '5', false, 'ghost');
     case 'finance': return '';
     case 'help': return btn('ส่งข้อความหาเจ้าหน้าที่', 'contactStaff');
     case 'coach': {

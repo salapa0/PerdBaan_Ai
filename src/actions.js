@@ -45,7 +45,7 @@ export const actions = {
     if (i == 0) go('form');
     else if (i == 1) s.previewSent ? go('preview') : toast('ยังไม่มีตัวอย่าง กรุณากรอกข้อมูลและให้ AI เขียนประกาศก่อนนะคะ');
     else if (i == 2) s.approved ? go('connections') : toast('อนุมัติตัวอย่างประกาศก่อนนะคะ');
-    else if (i == 3) { if (!s.approved) return toast('อนุมัติตัวอย่างประกาศก่อนนะคะ'); s.active = 'agoda'; const c = conn('agoda'); c.step = getPlatform('agoda').screens.length; c.coach = null; go('coach'); }
+    else if (i == 3) go('pricing');
     else if (i == 4) go('finance');
     else go('help');
   },
