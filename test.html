@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>Poet Baan — logic tests</title>
+<html lang="en"><head><meta charset="utf-8"><title>Perd Baan — logic tests</title>
 <style>body{font-family:system-ui,sans-serif;max-width:760px;margin:30px auto;padding:0 16px}
 .pass{color:#0a7f33}.fail{color:#c00;font-weight:700}.row{padding:3px 0;border-bottom:1px solid #eee;font-size:14px}
 h1{font-size:18px}#sum{font-weight:700;margin:12px 0;font-size:16px}</style></head>
 <body>
-<h1>เปิดบ้าน · Poet Baan — logic self-tests</h1>
+<h1>เปิดบ้าน · Perd Baan — logic self-tests</h1>
 <div id="sum">running…</div>
 <div id="out"></div>
 <script type="module">
@@ -97,7 +97,7 @@ t('custom room + other amenity are listed for the AI', (() => { const i = JSON.p
     if (L === 'zh') t(`preview ${tag}: no Thai, and no English words`, !TH_RE.test(tx) && !/[A-Za-z]{2,}/.test(tx.replace(/Wi-Fi/g, '')));
     if (L === 'th') t(`preview ${tag}: Thai wording present`, tx.includes('บาท/คืน') && tx.includes('ห้องริมน้ำ'));
     if (L === 'en') t(`preview ${tag}: English wording present`, tx.includes('THB / night') && tx.includes('Riverside Room') && tx.includes('Phu Phiang'));
-    if (L === 'zh') t(`preview ${tag}: Chinese wording present`, tx.includes('泰铢/晚') && tx.includes('河畔客房') && tx.includes('南府'));
+    if (L === 'zh') t(`preview ${tag}: Chinese wording present`, tx.includes('泰铢/晚') && tx.includes('河畔客房') && tx.includes('难府'));
     t(`preview ${tag}: photos shown`, /class="g-main"/.test(screenHtml()));
     t(`preview ${tag}: header title and bottom button stay Thai`, headerHtml().includes('ดูตัวอย่างประกาศ') && dockHtml().includes(approved ? 'กลับไปที่แชท' : 'อนุมัติ'));
   }
@@ -137,6 +137,10 @@ t('custom room + other amenity are listed for the AI', (() => { const i = JSON.p
   t('card has cover photo, title, link and copy button', /class="bub ann"><img src="public\/demo-photos\/01-front\.jpg"/.test(both) && both.includes(savedDraft.title_th) && both.includes(platforms[0].sample) && /data-a="copyLink" data-v="agoda"/.test(both));
   platforms.forEach(p => Object.assign(state.conns[p.id], { link: '', linkSent: false, live: false }));
 })();
+
+// saved demo draft wording
+t('saved Chinese draft names Nan province as 难府', savedDraft.desc_zh.includes('难府') && savedDraft.location_zh.includes('难府') && !/南府/.test(JSON.stringify(savedDraft)));
+t('saved English draft does not promise free parking', !/free/i.test(savedDraft.desc_en));
 
 // coach Plan B filename match (saved mode → no Ollama needed)
 (async () => {

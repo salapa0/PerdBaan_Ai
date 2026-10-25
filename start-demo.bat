@@ -1,8 +1,8 @@
 @echo off
-REM Start the Poet Baan demo on http://localhost:5173
+REM Start the Perd Baan demo on http://localhost:5173
 cd /d "%~dp0"
 echo.
-echo   Poet Baan demo  -  http://localhost:5173
+echo   Perd Baan demo  -  http://localhost:5173
 echo   Opening Chrome and starting the server...  (close this window to stop)
 echo.
 start "" http://localhost:5173

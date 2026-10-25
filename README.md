@@ -1,6 +1,6 @@
 <div align="center">
 
-# เปิดบ้าน · Poet Baan
+# เปิดบ้าน · Perd Baan
 
 ### AI helps rural homestays get listed on Agoda — in Thai, English & Chinese
 
