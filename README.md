@@ -20,7 +20,7 @@ monthly plan; billing is simulated in this demo).
 
 ## [⬇️ &nbsp; Download the demo](https://github.com/salapa0/PerdBaan_Ai/archive/refs/heads/main.zip)
 
-**[Quick start](#-quick-start)** · **[Turn on the live AI](#-turn-on-the-live-ai-optional)** · **[Demo flow](#-demo-flow-about-3-minutes)** · **[Docs](#-docs)**
+**[Quick start](#-quick-start)** · **[Turn on the live AI](#-turn-on-the-live-ai-optional)** · **[Demo flow](#-demo-flow-about-3-minutes)** · **[Pricing](#-pricing)** · **[Docs](#-docs)**
 
 </div>
 
@@ -116,6 +116,20 @@ The default tags are already set in `src/config.js`, so there's nothing to edit 
 | Shift+R | Reset everything |
 
 </details>
+
+---
+
+## 💰 Pricing
+
+**Free until your first guest.** Owners list on Agoda and Google Business Profile at no cost; billing starts only once a real booking is confirmed. A flat monthly fee covers every platform we connect, and เปิดบ้าน never takes a booking commission (on booking platforms like Agoda, the platform pays the owner directly).
+
+| Plan | Monthly | Setup | For | Includes |
+|---|---|---|---|---|
+| Starter | ฿290 | ฿1,500 | Owners who want the lightest start | 3-language listing on every platform, staff review before sending, AI coach for each sign-up |
+| **Standard** (default) | **฿490** | ฿2,500, waived in the starter offer | Most homestays | Everything in Starter, AI photo and description tuning, listing link checks, pay only after the first guest |
+| Community | ฿390 per house | ฿15,000 per village | Villages / CBT groups with 10+ houses | Everything in Standard, one place to manage the whole village, sponsor support (province / DASTA / OTOP) |
+
+Annual prepay: pay 10 months, get 12. Add-ons: photo shoot ฿1,500 · video reel ฿990.
 
 ---
 
