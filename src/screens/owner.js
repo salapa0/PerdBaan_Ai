@@ -28,8 +28,15 @@ const T = '9:41';
 const bot = h => `<div class="row"><span class="av">เ</span><div class="bub">${h}</div><time>${T}</time></div>`;
 const me = h => `<div class="row me"><time>อ่านแล้ว ${T}</time><div class="bub me">${h}</div></div>`;
 const fx = (txt, label, v) => `<div class="row"><span class="av">เ</span><div class="bub fx"><p>${txt}</p><button data-a="go" data-v="${v}">${label}</button></div></div>`;
-// An incoming message from a (simulated) guest — a different person from the "เปิดบ้าน" bot.
-const cust = (name, h) => `<div class="row"><span class="av cust" aria-hidden="true">${esc(name.slice(0, 1))}</span><div class="bub cust"><small class="cust-name">${esc(name)}</small>${h}</div></div>`;
+// A guest enquiry relayed by our server from a channel's API — sent as the system ("เปิดบ้าน"), in the third person,
+// with a link that (mock) sends the owner to that channel and a confirm button for real bookings.
+const ping = c => `<div class="row"><span class="av">เ</span><div class="bub fx ping">`
+  + `<p><small class="ping-via">📩 คำขอจาก ${esc(c.via)} · ${esc(c.time)}</small>มีลูกค้าทักเข้ามาผ่าน ${esc(c.via)} ${esc(c.msg)}`
+  + `<small class="ping-est">${c.nights} คืน · ประมาณ ${c.amount.toLocaleString('en-US')} บาท</small></p>`
+  + `<button class="ping-link" data-a="openChannel" data-v="${esc(c.id)}">เปิดดูคำขอบน ${esc(c.via)} ↗</button>`
+  + (c.confirmed ? `<span class="ping-ok">✓ ยืนยันแล้วว่าเป็นการจองจริง</span>`
+    : `<button data-a="confirmCustomer" data-v="${esc(c.id)}">ยืนยันว่ามีการจองจริง</button>`)
+  + `</div><time>${esc(c.time)}</time></div>`;
 
 function chatHtml() {
   const s = state; let h = '<div class="date">วันนี้</div>';
@@ -43,8 +50,9 @@ function chatHtml() {
   const pending = s.approved ? platforms.filter(p => !conn(p.id).live) : [];
   if (platforms.some(p => conn(p.id).live) && pending.length) h += fx(`เพิ่มช่องทาง ${esc(pending[0].short || pending[0].name)} ได้อีกนะคะ`, 'เพิ่มการเชื่อมต่อ', 'connections');
   if (s.customers.length) {
-    s.customers.forEach(c => h += cust(c.name, esc(c.msg)));
-    h += fx(`🎉 มีลูกค้าทักเข้ามาแล้ว ${s.customers.length} ราย ดูสรุปการเงินได้เลยค่ะ`, 'ไปที่หน้าการเงิน', 'finance');
+    s.customers.forEach(c => h += ping(c));
+    const ok = s.customers.filter(c => c.confirmed).length;
+    if (ok) h += fx(`🎉 ยืนยันการจองจริงแล้ว ${ok} ราย ดูสรุปการเงินได้เลยค่ะ`, 'ไปที่หน้าการเงิน', 'finance');
   }
   if (!s.draft) h += `<div class="chips"><button data-a="go" data-v="form">${s.started ? 'กรอกข้อมูลต่อ' : 'เริ่มเลย'}</button></div>`;
   return h;
@@ -99,30 +107,33 @@ export function screenHtml() {
   }
 }
 
-// ---- Finance: billing status + a running summary of bookings from (simulated) guests ----
-// Free until the first customer; the first guest ping flips billing on and starts the earnings tally.
+// ---- Finance: billing status + a running summary of confirmed bookings ----
+// We are the middleman: a guest ping is only an enquiry, so it counts here once the owner confirms a real booking.
+// Free until the first confirmed customer; that confirmation flips billing on and starts the earnings tally.
 function financeHtml() {
-  const cs = state.customers, has = cs.length > 0;
+  const cs = state.customers.filter(c => c.confirmed), has = cs.length > 0;
+  const waiting = state.customers.length - cs.length;
   const nights = cs.reduce((n, c) => n + c.nights, 0);
   const gross = cs.reduce((n, c) => n + c.amount, 0);
   const row = (label, val, cls = '') => `<div class="fin-row"><span>${esc(label)}</span><b class="${cls}">${val}</b></div>`;
   return `<p class="big center">${has ? 'สรุปการเงิน' : 'ฟรีจนกว่าจะได้ลูกค้าคนแรก'}</p>`
     + (has
         ? `<div class="note"><b>เริ่มแพ็กเกจ Standard · 490 บาท/เดือน</b><br>คุณได้ลูกค้าคนแรกแล้ว 🎉 ค่าบริการรายเดือนจะเริ่มในรอบบิลถัดไป (ขั้นต่ำ 6 เดือน)</div>`
-        : `<div class="note"><b>ยังไม่มีค่าใช้จ่าย</b><br>ลงประกาศได้เต็มที่ ยังไม่ต้องชำระเงินจนกว่าจะมีลูกค้าคนแรกเข้ามาค่ะ</div>`)
-    + `<p class="lbl">สรุปจากลูกค้าที่ทักเข้ามา</p>`
+        : `<div class="note"><b>ยังไม่มีค่าใช้จ่าย</b><br>ลงประกาศได้เต็มที่ ยังไม่ต้องชำระเงินจนกว่าจะมีการจองจริงครั้งแรกค่ะ</div>`)
+    + (waiting ? `<p class="muted center">มีคำขอรอยืนยันในแชท ${waiting} ราย จะนับที่นี่เมื่อยืนยันว่ามีการจองจริง</p>` : '')
+    + `<p class="lbl">สรุปจากการจองที่ยืนยันแล้ว</p>`
     + `<div class="agoda">`
-    + row('ลูกค้าที่ทักเข้ามา', `${cs.length} ราย`)
+    + row('การจองที่ยืนยันแล้ว', `${cs.length} ราย`)
     + row('จำนวนคืน', `${nights} คืน`)
     + row('รายได้รวม (ประมาณการ)', `${gross.toLocaleString('en-US')} บาท`, 'ok')
     + `</div>`
     + (has
-        ? `<p class="lbl">ลูกค้าล่าสุด</p>`
+        ? `<p class="lbl">การจองล่าสุด</p>`
           + cs.slice().reverse().map(c =>
-              `<div class="agoda"><small>${esc(c.time)}</small><b>${esc(c.name)}</b>`
+              `<div class="agoda"><small>${esc(c.time)} · ผ่าน ${esc(c.via)}</small><b>${esc(c.name)}</b>`
               + `<p class="muted">${esc(c.msg)}</p>`
               + `<p class="ok fine">${c.nights} คืน · ${c.amount.toLocaleString('en-US')} บาท</p></div>`).join('')
-        : `<p class="muted center">ยังไม่มีลูกค้าทักเข้ามา เมื่อมีลูกค้า ยอดประมาณการจะแสดงที่นี่</p>`)
+        : `<p class="muted center">ยังไม่มีการจองที่ยืนยัน เมื่อยืนยันแล้ว ยอดประมาณการจะแสดงที่นี่</p>`)
     + `<p class="ok fine center">✓ เปิดบ้านไม่หักค่าคอมมิชชัน · ค่าธรรมเนียมของช่องทาง (เช่น Agoda) เป็นไปตามเงื่อนไขของช่องทางนั้น</p>`;
 }
 

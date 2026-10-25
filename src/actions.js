@@ -9,18 +9,19 @@ import { askJson, ping } from './ai/ollama.js';
 import { buildCopyCards } from './rules/buildCopyCards.js';
 import { suggestPrice } from './rules/suggestPrice.js';
 import { getPlatform, platforms } from './data/platforms.js';
-import { toast } from './ui/dom.js';
+import { $, esc, toast } from './ui/dom.js';
 import { fileToPhoto } from './photos.js';
 import { MAX_PHOTOS } from './data/options.js';
 
 let ctl = null;
-// Sample guests used by simulateCustomer to demo an incoming enquiry/booking.
+// Sample guest enquiries used by simulateCustomer. A ping is our server relaying an API signal
+// from a channel (Agoda / Google), so the text describes the guest in the third person.
 const CUSTOMER_POOL = [
-  { name: 'คุณมานี', msg: 'สนใจห้องพักช่วงเสาร์–อาทิตย์นี้ ว่างไหมคะ', nights: 2 },
-  { name: 'คุณสมชาย', msg: 'ขอจอง 2 คืนครับ มีที่จอดรถไหมครับ', nights: 2 },
-  { name: 'Emma', msg: 'Hi! Is the room available next weekend for 3 nights?', nights: 3 },
-  { name: 'คุณกานต์', msg: 'มากัน 4 คน พักคืนเดียว ราคาเท่าไรคะ', nights: 1 },
-  { name: '李伟', msg: '你好，下周有空房吗？住两晚', nights: 2 },
+  { name: 'คุณมานี', msg: 'คุณมานีสอบถามว่าห้องพักช่วงเสาร์–อาทิตย์นี้ยังว่างอยู่หรือไม่', nights: 2 },
+  { name: 'คุณสมชาย', msg: 'คุณสมชายต้องการจอง 2 คืน และสอบถามว่ามีที่จอดรถหรือไม่', nights: 2 },
+  { name: 'Emma', msg: 'Emma (แขกต่างชาติ) สอบถามว่าห้องว่างช่วงสุดสัปดาห์หน้า 3 คืนหรือไม่', nights: 3 },
+  { name: 'คุณกานต์', msg: 'คุณกานต์มากัน 4 คน พักคืนเดียว และสอบถามราคาห้อง', nights: 1 },
+  { name: '李伟', msg: '李伟 (แขกจีน) สอบถามว่าสัปดาห์หน้ามีห้องว่างสำหรับ 2 คืนหรือไม่', nights: 2 },
 ];
 // With a single room type, its count simply follows the total number of rooms.
 const autoCount = () => { const rs = state.intake.rooms; if (rs.length === 1) rs[0].count = state.intake.totalRooms; };
@@ -51,18 +52,41 @@ export const actions = {
   // ช่วยเหลือ / ติดต่อเจ้าหน้าที่: send a message to staff.
   contactStaff() { toast('ส่งข้อความถึงเจ้าหน้าที่แล้วค่ะ ทีมงานจะตอบกลับในแชทโดยเร็ว'); },
   askStaff(topic) { toast(`ส่งคำถามเรื่อง “${topic}” ให้เจ้าหน้าที่แล้วค่ะ`); },
-  // Demo: a guest pings the owner. The first ping flips billing on (free until first customer).
+  // Demo: our server relays a guest enquiry from a channel's API; the chat links to a mock "send to channel" popup.
+  // It only counts on the finance page once the owner confirms it became a real booking (we are the middleman).
   simulateCustomer() {
     const s = state;
     const pick = CUSTOMER_POOL[s.customers.length % CUSTOMER_POOL.length];
+    const live = platforms.filter(p => conn(p.id).live), from = live.length ? live : platforms;
+    const via = from[s.customers.length % from.length];
     const price = suggestPrice(s.intake).value || 800;
     const now = new Date(), time = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
-    const first = s.customers.length === 0;
-    s.customers.push({ name: pick.name, msg: pick.msg, nights: pick.nights, amount: pick.nights * price, time });
+    s.customers.push({ id: Date.now(), name: pick.name, msg: pick.msg, nights: pick.nights, amount: pick.nights * price, time,
+      via: via.short || via.name, confirmed: false });
     if (s.step !== 'chat') go('chat'); else emit();
-    toast(first ? '🎉 ลูกค้าคนแรกทักเข้ามาแล้ว!' : `🔔 ${pick.name} ส่งข้อความถึงคุณ`);
+    toast(`🔔 ระบบได้รับคำขอจาก ${via.short || via.name}: ${pick.name} ทักเข้ามา`);
   },
-  reset: () => resetState(),
+  // The owner confirms a ping turned into a real booking; only then it reaches the finance page.
+  confirmCustomer(id) {
+    const c = state.customers.find(c => String(c.id) === String(id));
+    if (!c || c.confirmed) return;
+    const first = !state.customers.some(c => c.confirmed);
+    c.confirmed = true; emit();
+    toast(first ? '🎉 ยืนยันการจองจริงครั้งแรกแล้ว!' : `✓ ยืนยันการจองของ ${c.name} แล้ว`);
+  },
+  // Mock of sending the owner to the channel the ping came from: a popup on our page only, no copy of the channel's site.
+  openChannel(id) {
+    const c = state.customers.find(c => String(c.id) === String(id)); if (!c) return;
+    const box = (title, body) => $('#modal-root').innerHTML = `<div class="pop-bg" data-a="closePopup"></div><div class="pop" role="dialog" aria-modal="true" aria-label="${esc(title)}">`
+      + `<b>${esc(title)}</b>${body}<button class="btn" data-a="closePopup">ปิด</button></div>`;
+    box(`กำลังส่งคุณไปที่ ${c.via}…`, '<div class="spin"></div>');
+    clearTimeout(actions.openChannel.t);
+    actions.openChannel.t = setTimeout(() => $('#modal-root .pop') && box(`✓ ส่งคุณไปที่ ${c.via} แล้ว`,
+      `<p>คำขอของ ${esc(c.name)} · ${c.nights} คืน · ประมาณ ${c.amount.toLocaleString('en-US')} บาท</p>`
+      + `<p class="muted fine">(จำลอง) ในระบบจริง ปุ่มนี้จะเปิดหน้าคำขอบน ${esc(c.via)} ให้คุณตอบแขกได้ทันที เมื่อแขกจองจริงแล้ว กลับมากด “ยืนยันว่ามีการจองจริง” ในแชท</p>`), 900);
+  },
+  closePopup() { clearTimeout(actions.openChannel.t); $('#modal-root').innerHTML = ''; },
+  reset: () => { actions.closePopup(); resetState(); },
   setLang: l => { state.lang = l; emit(); },
   loadDemo() { state.intake = clone(demoHomestay); state.photoIdx = 0; emit(); toast('โหลดบ้านตัวอย่างแล้ว'); },
   toggleMode() { state.mode = state.mode === 'live' ? 'saved' : 'live'; emit(); toast('โหมด AI: ' + (state.mode === 'live' ? 'Live' : 'Saved')); },
