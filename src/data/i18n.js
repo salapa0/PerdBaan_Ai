@@ -8,23 +8,23 @@ export const HTML_LANG = { th: 'th', en: 'en', zh: 'zh-Hans' };
 
 export const UI = {
   th: {
-    perNight: 'บาท/คืน', range: 'ช่วง', rooms: 'ห้องพัก', amenities: 'สิ่งอำนวยความสะดวก',
+    perNight: 'บาท/คืน', range: 'ช่วงราคา', rooms: 'ห้องพัก', amenities: 'สิ่งอำนวยความสะดวก',
     roomLine: (n, c, p) => `${n} × ${c} ห้อง · ${p} บาท/คืน`,
-    tip: ph => `💡 ราคาที่ AI แนะนำจากข้อมูลของคุณ · ติดต่อ ${ph}`,
+    tip: ph => `💡 ราคาแนะนำโดย AI จากข้อมูลที่คุณกรอก · เบอร์ติดต่อ ${ph}`,
     approved: '✓ คุณอนุมัติประกาศนี้แล้ว',
     photo: n => `รูปที่ ${n}`,
   },
   en: {
     perNight: 'THB / night', range: 'Range', rooms: 'Rooms', amenities: 'Amenities',
     roomLine: (n, c, p) => `${n} × ${c} · ${p} THB / night`,
-    tip: ph => `💡 Rate suggested by AI from the details you gave · Contact ${ph}`,
+    tip: ph => `💡 Suggested rate from AI, based on the details you entered · Contact: ${ph}`,
     approved: '✓ You have approved this listing',
     photo: n => `Photo ${n}`,
   },
   zh: {
-    perNight: '泰铢/晚', range: '区间', rooms: '客房', amenities: '设施',
+    perNight: '泰铢/晚', range: '参考区间', rooms: '客房', amenities: '设施',
     roomLine: (n, c, p) => `${n} × ${c}间 · ${p}泰铢/晚`,
-    tip: ph => `💡 根据您提供的信息推荐的价格 · 联系电话 ${ph}`,
+    tip: ph => `💡 人工智能根据您填写的信息推荐的价格 · 联系电话 ${ph}`,
     approved: '✓ 您已批准此房源',
     photo: n => `第${n}张照片`,
   },

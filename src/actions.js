@@ -17,7 +17,7 @@ let ctl = null;
 // Sample guests used by simulateCustomer to demo an incoming enquiry/booking.
 const CUSTOMER_POOL = [
   { name: 'คุณมานี', msg: 'สนใจห้องพักช่วงเสาร์–อาทิตย์นี้ ว่างไหมคะ', nights: 2 },
-  { name: 'คุณสมชาย', msg: 'ขอจอง 2 คืนครับ มีที่จอดรถไหม', nights: 2 },
+  { name: 'คุณสมชาย', msg: 'ขอจอง 2 คืนครับ มีที่จอดรถไหมครับ', nights: 2 },
   { name: 'Emma', msg: 'Hi! Is the room available next weekend for 3 nights?', nights: 3 },
   { name: 'คุณกานต์', msg: 'มากัน 4 คน พักคืนเดียว ราคาเท่าไรคะ', nights: 1 },
   { name: '李伟', msg: '你好，下周有空房吗？住两晚', nights: 2 },
@@ -42,14 +42,14 @@ export const actions = {
   menu(i) {
     const s = state;
     if (i == 0) go('form');
-    else if (i == 1) s.previewSent ? go('preview') : toast('ยังไม่มีตัวอย่าง กรอกข้อมูลให้ AI เขียนประกาศก่อนนะคะ');
+    else if (i == 1) s.previewSent ? go('preview') : toast('ยังไม่มีตัวอย่าง กรุณากรอกข้อมูลและให้ AI เขียนประกาศก่อนนะคะ');
     else if (i == 2) s.approved ? go('connections') : toast('อนุมัติตัวอย่างประกาศก่อนนะคะ');
     else if (i == 3) { if (!s.approved) return toast('อนุมัติตัวอย่างประกาศก่อนนะคะ'); s.active = 'agoda'; const c = conn('agoda'); c.step = getPlatform('agoda').screens.length; c.coach = null; go('coach'); }
     else if (i == 4) go('finance');
     else go('help');
   },
   // ช่วยเหลือ / ติดต่อเจ้าหน้าที่: send a message to staff.
-  contactStaff() { toast('ส่งข้อความถึงเจ้าหน้าที่แล้ว ทีมงานจะตอบในแชทโดยเร็วค่ะ'); },
+  contactStaff() { toast('ส่งข้อความถึงเจ้าหน้าที่แล้วค่ะ ทีมงานจะตอบกลับในแชทโดยเร็ว'); },
   askStaff(topic) { toast(`ส่งคำถามเรื่อง “${topic}” ให้เจ้าหน้าที่แล้วค่ะ`); },
   // Demo: a guest pings the owner. The first ping flips billing on (free until first customer).
   simulateCustomer() {
@@ -68,10 +68,10 @@ export const actions = {
   toggleMode() { state.mode = state.mode === 'live' ? 'saved' : 'live'; emit(); toast('โหมด AI: ' + (state.mode === 'live' ? 'Live' : 'Saved')); },
   stop() { ctl && ctl.abort(); },
   async warm() {
-    if (!(await ping())) return toast('ไม่พบ Ollama');
-    toast('กำลังอุ่นโมเดล…');
-    try { await askJson(config.textModel, 'ตอบ JSON {"ok":1}'); await askJson(config.visionModel, 'reply JSON {"ok":1}'); toast('โมเดลพร้อมแล้ว'); }
-    catch { toast('อุ่นโมเดลไม่สำเร็จ ตรวจ tag ใน config.js'); }
+    if (!(await ping())) return toast('ไม่พบ Ollama กรุณาเปิดโปรแกรมก่อน');
+    toast('กำลังเตรียมโมเดล…');
+    try { await askJson(config.textModel, 'ตอบ JSON {"ok":1}'); await askJson(config.visionModel, 'reply JSON {"ok":1}'); toast('โมเดลพร้อมใช้งานแล้ว'); }
+    catch { toast('เตรียมโมเดลไม่สำเร็จ กรุณาตรวจชื่อโมเดล (tag) ใน config.js'); }
   },
   setField(k, v) { if (k === 'phone') state.intake.contact.phone = v; else state.intake[k] = v; },
   setTotal(d) { const i = state.intake; i.totalRooms = Math.min(30, Math.max(1, i.totalRooms + +d)); autoCount(); emit(); },
@@ -97,7 +97,7 @@ export const actions = {
     if (room <= 0) return toast(`เพิ่มรูปได้ไม่เกิน ${MAX_PHOTOS} รูปค่ะ`);
     const done = (await Promise.all(imgs.slice(0, room).map(f => fileToPhoto(f).catch(() => null)))).filter(Boolean);
     const cur = state.intake.photos; cur.push(...done.slice(0, Math.max(0, MAX_PHOTOS - cur.length))); emit();
-    toast(!done.length ? 'เปิดรูปไม่ได้ ลองใช้ไฟล์ JPG หรือ PNG' : done.length < imgs.length ? `เพิ่มรูปได้ ${done.length} จาก ${imgs.length} รูป` : `เพิ่มรูปแล้ว ${done.length} รูป`);
+    toast(!done.length ? 'เปิดรูปไม่ได้ ลองใช้ไฟล์ JPG หรือ PNG' : done.length < imgs.length ? `เพิ่มรูปสำเร็จ ${done.length} จาก ${imgs.length} รูป` : `เพิ่มรูปแล้ว ${done.length} รูป`);
   },
   removePhoto(k) { state.intake.photos.splice(+k, 1); state.photoIdx = 0; emit(); },
   setPhoto(k) { state.photoIdx = +k; emit(); },
@@ -130,7 +130,7 @@ export const actions = {
   },
   sendLink() { const c = conn(); if (getPlatform(state.active).link.check(c.link).ok) { c.linkSent = true; emit(); toast('ส่งลิงก์ให้เจ้าหน้าที่แล้ว'); } },
   // Staff console: simulate the active platform's approval/verification going through.
-  simulateAgoda() { const c = conn(); if (c.linkSent) { c.live = true; go('live'); } else toast('ยังไม่มีลิงก์จากเจ้าของ'); },
+  simulateAgoda() { const c = conn(); if (c.linkSent) { c.live = true; go('live'); } else toast('ยังไม่ได้รับลิงก์จากเจ้าของบ้านพัก'); },
   jump(step) {
     const J = ['chat', 'form', 'review', 'preview', 'connections', 'coach', 'live'], n = J.indexOf(step);
     if (!state.intake.name) state.intake = clone(demoHomestay);

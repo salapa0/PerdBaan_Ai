@@ -18,5 +18,5 @@ export async function coachScreenshot({ base64, fileName }, cards, step, mode = 
   }
   const s = screens.find(x => x.screen === id);
   const card = cards.find(c => c.screen === id && !c.hintOnly);
-  return { screen_id: id, explain_th: explain || `หน้านี้คือ "${s.title}" คัดลอกข้อมูลจากการ์ดด้านล่างไปวางได้เลย`, highlight: card ? card.label : '', source };
+  return { screen_id: id, explain_th: explain || `หน้านี้คือ “${s.title}” คัดลอกข้อมูลจากการ์ดด้านล่างไปวางได้เลยค่ะ`, highlight: card ? card.label : '', source };
 }

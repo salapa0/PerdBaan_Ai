@@ -9,7 +9,7 @@ import { suggestPrice } from '../rules/suggestPrice.js';
 
 export const HEAD = {
   chat: ['line'], review: ['line'], live: ['line'],
-  form: ['liff', 'กรอกข้อมูลบ้านพัก'], writing: ['liff', 'AI กำลังเขียน'], preview: ['liff', 'ดูตัวอย่างประกาศ'],
+  form: ['liff', 'กรอกข้อมูลบ้านพัก'], writing: ['liff', 'AI กำลังเขียนประกาศ'], preview: ['liff', 'ดูตัวอย่างประกาศ'],
   connections: ['liff', 'การเชื่อมต่อ'], coach: ['liff', 'สมัครช่องทาง'],
   finance: ['liff', 'การเงิน'], help: ['liff', 'ติดต่อเจ้าหน้าที่'],
 };
@@ -33,18 +33,18 @@ const cust = (name, h) => `<div class="row"><span class="av cust" aria-hidden="t
 
 function chatHtml() {
   const s = state; let h = '<div class="date">วันนี้</div>';
-  h += bot('สวัสดีค่ะ 👋 เปิดบ้านช่วยให้บ้านพักของคุณขึ้น Agoda และ Google Maps ได้ ตอบไม่กี่ข้อ แล้ว AI เขียนประกาศให้ เราไม่หักค่าคอมมิชชันจากการจอง และฟรีจนกว่าจะได้ลูกค้าคนแรก');
-  if (s.started) h += me('เริ่มเลย') + bot('ยินดีค่ะ กรอกข้อมูลบ้านพักไม่กี่ข้อ แล้ว AI จะเขียนประกาศให้');
-  if (s.draft) h += me('ให้ AI เขียนประกาศ') + bot('ได้รับข้อมูลแล้วค่ะ AI เขียนประกาศให้เรียบร้อยแล้ว');
-  if (s.previewSent) h += fx(`ตัวอย่างประกาศของ ${esc(s.intake.name)} พร้อมแล้ว`, 'ดูตัวอย่าง', 'preview');
-  if (s.approved) h += me('อนุมัติ') + fx('ขอบคุณค่ะ ต่อไปเชื่อมต่อช่องทางเพื่อให้ประกาศขึ้นจริง', 'ไปที่หน้าการเชื่อมต่อ', 'connections');
+  h += bot('สวัสดีค่ะ 👋 เปิดบ้านช่วยให้บ้านพักของคุณขึ้น Agoda และ Google Maps ได้ง่าย ๆ เพียงตอบคำถามไม่กี่ข้อ แล้ว AI จะเขียนประกาศให้ เราไม่หักค่าคอมมิชชันจากการจอง และใช้ฟรีจนกว่าจะได้ลูกค้าคนแรกค่ะ');
+  if (s.started) h += me('เริ่มเลย') + bot('ยินดีค่ะ รบกวนกรอกข้อมูลบ้านพักสักเล็กน้อย แล้ว AI จะเขียนประกาศให้ค่ะ');
+  if (s.draft) h += me('ให้ AI เขียนประกาศ') + bot('ได้รับข้อมูลแล้วค่ะ AI เขียนประกาศเรียบร้อยแล้วค่ะ');
+  if (s.previewSent) h += fx(`ตัวอย่างประกาศของ ${esc(s.intake.name)} พร้อมแล้วค่ะ`, 'ดูตัวอย่าง', 'preview');
+  if (s.approved) h += me('อนุมัติ') + fx('ขอบคุณค่ะ ขั้นต่อไปคือเชื่อมต่อช่องทางต่าง ๆ เพื่อให้ประกาศขึ้นจริงค่ะ', 'ไปที่หน้าการเชื่อมต่อ', 'connections');
   platforms.forEach(p => { const c = conn(p.id); if (c.linkSent && !c.live) h += me(esc(c.link)) + bot(p.link.wait); });
   platforms.forEach(p => { if (conn(p.id).live) h += bot(p.liveMsg(esc(s.intake.name))) + announceCard(p); });
   const pending = s.approved ? platforms.filter(p => !conn(p.id).live) : [];
   if (platforms.some(p => conn(p.id).live) && pending.length) h += fx(`เพิ่มช่องทาง ${esc(pending[0].short || pending[0].name)} ได้อีกนะคะ`, 'เพิ่มการเชื่อมต่อ', 'connections');
   if (s.customers.length) {
     s.customers.forEach(c => h += cust(c.name, esc(c.msg)));
-    h += fx(`🎉 มีลูกค้าทักเข้ามา ${s.customers.length} ราย — ดูสรุปการเงินได้เลย`, 'ไปที่หน้าการเงิน', 'finance');
+    h += fx(`🎉 มีลูกค้าทักเข้ามาแล้ว ${s.customers.length} ราย ดูสรุปการเงินได้เลยค่ะ`, 'ไปที่หน้าการเงิน', 'finance');
   }
   if (!s.draft) h += `<div class="chips"><button data-a="go" data-v="form">${s.started ? 'กรอกข้อมูลต่อ' : 'เริ่มเลย'}</button></div>`;
   return h;
@@ -78,7 +78,7 @@ export function screenHtml() {
   if (isChat(s.step)) return chatHtml();
   switch (s.step) {
     case 'form': return formHtml();
-    case 'writing': return `<div class="spin"></div><p class="center">กำลังเขียนไทย อังกฤษ จีน…</p>`;
+    case 'writing': return `<div class="spin"></div><p class="center">AI กำลังเขียนประกาศ 3 ภาษา (ไทย อังกฤษ จีน)…</p>`;
     case 'preview': {
       const L = s.lang, d = s.draft, p = suggestPrice(i), U = UI[L];
       const tabs = `<div class="tabs">${LANGS.map(([k, n]) => `<button data-a="setLang" data-v="${k}" lang="${HTML_LANG[k]}" aria-pressed="${L === k}" class="${L === k ? 'on' : ''}">${n}</button>`).join('')}</div>`;
@@ -108,21 +108,21 @@ function financeHtml() {
   const row = (label, val, cls = '') => `<div class="fin-row"><span>${esc(label)}</span><b class="${cls}">${val}</b></div>`;
   return `<p class="big center">${has ? 'สรุปการเงิน' : 'ฟรีจนกว่าจะได้ลูกค้าคนแรก'}</p>`
     + (has
-        ? `<div class="note"><b>เริ่มแพ็กเกจ Standard · ฿490/เดือน</b><br>คุณได้ลูกค้าคนแรกแล้ว 🎉 ค่าสมาชิกจะเริ่มในรอบบิลถัดไป (ขั้นต่ำ 6 เดือน)</div>`
-        : `<div class="note"><b>ยังไม่มีค่าใช้จ่าย</b><br>ลงประกาศได้เต็มที่ ยังไม่ต้องจ่ายจนกว่าจะมีลูกค้าคนแรกเข้ามา</div>`)
+        ? `<div class="note"><b>เริ่มแพ็กเกจ Standard · 490 บาท/เดือน</b><br>คุณได้ลูกค้าคนแรกแล้ว 🎉 ค่าบริการรายเดือนจะเริ่มในรอบบิลถัดไป (ขั้นต่ำ 6 เดือน)</div>`
+        : `<div class="note"><b>ยังไม่มีค่าใช้จ่าย</b><br>ลงประกาศได้เต็มที่ ยังไม่ต้องชำระเงินจนกว่าจะมีลูกค้าคนแรกเข้ามาค่ะ</div>`)
     + `<p class="lbl">สรุปจากลูกค้าที่ทักเข้ามา</p>`
     + `<div class="agoda">`
     + row('ลูกค้าที่ทักเข้ามา', `${cs.length} ราย`)
     + row('จำนวนคืน', `${nights} คืน`)
-    + row('รายได้รวม (ประมาณการ)', `฿${gross.toLocaleString('en-US')}`, 'ok')
+    + row('รายได้รวม (ประมาณการ)', `${gross.toLocaleString('en-US')} บาท`, 'ok')
     + `</div>`
     + (has
         ? `<p class="lbl">ลูกค้าล่าสุด</p>`
           + cs.slice().reverse().map(c =>
               `<div class="agoda"><small>${esc(c.time)}</small><b>${esc(c.name)}</b>`
               + `<p class="muted">${esc(c.msg)}</p>`
-              + `<p class="ok fine">${c.nights} คืน · ฿${c.amount.toLocaleString('en-US')}</p></div>`).join('')
-        : `<p class="muted center">ยังไม่มีลูกค้าทักเข้ามา — เมื่อมีลูกค้า ยอดประมาณการจะแสดงที่นี่</p>`)
+              + `<p class="ok fine">${c.nights} คืน · ${c.amount.toLocaleString('en-US')} บาท</p></div>`).join('')
+        : `<p class="muted center">ยังไม่มีลูกค้าทักเข้ามา เมื่อมีลูกค้า ยอดประมาณการจะแสดงที่นี่</p>`)
     + `<p class="ok fine center">✓ เปิดบ้านไม่หักค่าคอมมิชชัน · ค่าธรรมเนียมของช่องทาง (เช่น Agoda) เป็นไปตามเงื่อนไขของช่องทางนั้น</p>`;
 }
 
@@ -131,10 +131,10 @@ function helpHtml() {
   const q = (label, v) => `<button class="chip" data-a="askStaff" data-v="${esc(v)}">${esc(label)}</button>`;
   return `<p class="big center">ติดต่อเจ้าหน้าที่</p>`
     + `<p class="muted center">ทีมงานเปิดบ้านพร้อมช่วยคุณทุกขั้นตอน</p>`
-    + `<div class="agoda"><small>เวลาทำการ</small><b>ทุกวัน 9:00–18:00 น.</b><p class="muted">ตอบในแชทไลน์นี้ โดยเฉลี่ยภายใน 1 ชั่วโมง</p></div>`
+    + `<div class="agoda"><small>เวลาทำการ</small><b>ทุกวัน 9:00–18:00 น.</b><p class="muted">ตอบในแชท LINE นี้ โดยเฉลี่ยภายใน 1 ชั่วโมง</p></div>`
     + `<div class="agoda"><small>สายด่วน (เบอร์สาธิต)</small><b>02-123-4567</b><p class="muted">สายด่วนช่วยเหลือเจ้าของบ้านพัก</p></div>`
     + `<p class="lbl">คำถามที่พบบ่อย</p>`
-    + `<div class="chipset">${q('สมัครช่องทางยังไง', 'การสมัครช่องทาง')}${q('ค่าบริการเท่าไร', 'ค่าบริการ')}${q('แก้ไขประกาศ', 'การแก้ไขประกาศ')}</div>`;
+    + `<div class="chipset">${q('สมัครช่องทางอย่างไร', 'การสมัครช่องทาง')}${q('ค่าบริการเท่าไร', 'ค่าบริการ')}${q('แก้ไขประกาศ', 'การแก้ไขประกาศ')}</div>`;
 }
 
 // ---- Connections: one card per platform, rendered from platforms.js ----
@@ -143,7 +143,7 @@ function connStatus(p) {
   if (c.live) return { cls: 'ok', text: '✓ เชื่อมต่อแล้ว · ขึ้นจริง' };
   if (c.linkSent) return { cls: 'muted', text: p.link.wait };
   if (c.step > 1 || c.coach) return { cls: 'muted', text: `กำลังเชื่อมต่อ · ขั้นที่ ${Math.min(c.step, n)}/${n}` };
-  return { cls: 'muted', text: 'ยังไม่ได้เชื่อมต่อ · ผู้ช่วย AI จะพาทำทีละขั้น' };
+  return { cls: 'muted', text: 'ยังไม่ได้เชื่อมต่อ · ผู้ช่วย AI จะพาทำทีละขั้นตอน' };
 }
 function connectionsHtml() {
   return platforms.map(p => {
@@ -168,14 +168,14 @@ function coachHtml() {
   return `<div class="agoda"><small>${esc(p.short || p.name)} · ขั้นที่ ${c.step}/${n}</small><b>${esc(sc.field)}</b>${sc.screen === 'photos' ? coachPhotosHtml() : '<i></i><i></i>'}</div><p><b>${esc(sc.title)}</b> แตะการ์ดเพื่อคัดลอก</p>`
     + (c.step === 1 && p.needs ? `<p class="note">${esc(p.needs)}</p>` : '')
     + cards.map((cd, idx) => cd.screen !== sc.screen ? '' : `<button class="card ${cd.label === hl ? 'hl' : ''}" data-a="copy" data-v="${idx}"><small>${esc(cd.label)}${cd.hintOnly ? ' · คำแนะนำ' : ''}</small>${esc(cd.value)}</button>`).join('')
-    + (c.step === n ? `<label for="f-shot">ติดขัด? ส่งภาพหน้าจอ ${esc(p.short || p.name)} ให้ AI อธิบาย</label><input id="f-shot" type="file" accept="image/*" data-shot>` : '')
+    + (c.step === n ? `<label for="f-shot">ติดปัญหา? ส่งภาพหน้าจอ ${esc(p.short || p.name)} ให้ AI ช่วยอธิบาย</label><input id="f-shot" type="file" accept="image/*" data-shot>` : '')
     + (c.coach ? `<p class="note">${esc(c.coach.explain_th)}</p>` : '');
 }
 
 // The photos page of a sign-up: the owner's photos from the form, cover first.
 function coachPhotosHtml() {
   const ph = state.intake.photos || [];
-  if (!ph.length) return '<p class="note">ยังไม่มีรูป กลับไปหน้ากรอกข้อมูลเพื่อเพิ่มรูปที่พัก</p>';
+  if (!ph.length) return '<p class="note">ยังไม่มีรูป กรุณากลับไปหน้ากรอกข้อมูลเพื่อเพิ่มรูปที่พัก</p>';
   return `<div class="photos coach-photos">${ph.map((src, k) => `<div class="ph"><img src="${esc(src)}" alt="รูปที่ ${k + 1}">${k === 0 ? '<span class="cover">ปก</span>' : ''}</div>`).join('')}</div>`;
 }
 
@@ -213,14 +213,14 @@ const stepper = (id, n, a, vm, vp, sm = '') => `<div class="stepper ${sm}"><butt
 
 function formHtml() {
   const i = state.intake;
-  let h = field('name', 'ชื่อบ้านพัก', i.name) + field('location', 'ที่ตั้ง', i.location) + field('phone', 'เบอร์โทร', i.contact.phone, 'inputmode="tel"');
+  let h = field('name', 'ชื่อบ้านพัก', i.name) + field('location', 'ที่ตั้ง', i.location) + field('phone', 'เบอร์โทรศัพท์', i.contact.phone, 'inputmode="tel"');
   h += `<p class="lbl">ที่พักของคุณมีกี่ห้อง</p><div class="rowline">${stepper('', i.totalRooms, 'setTotal', '-1', '1')}<span>ห้อง</span></div>`;
-  h += `<p class="lbl">ประเภทห้อง (เลือกได้หลายแบบ)</p><div class="chipset">${ROOM_TYPES.map(t => chip(t, i.rooms.some(r => r.name === t && !r.custom), 'toggleType', t)).join('')}${chip('อื่นๆ (ระบุเอง)', i.rooms.some(r => r.custom), 'toggleType', '__other')}</div>`;
+  h += `<p class="lbl">ประเภทห้อง (เลือกได้หลายแบบ)</p><div class="chipset">${ROOM_TYPES.map(t => chip(t, i.rooms.some(r => r.name === t && !r.custom), 'toggleType', t)).join('')}${chip('อื่น ๆ (ระบุเอง)', i.rooms.some(r => r.custom), 'toggleType', '__other')}</div>`;
   h += i.rooms.map(r => `<div class="room"><div>${r.custom ? `<input data-r="${r.id}:name" placeholder="ชื่อประเภทห้อง" value="${esc(r.name)}" aria-label="ชื่อประเภทห้อง">` : `<b>${esc(r.name)}</b>`}</div>`
     + `<div class="rowline"><span>จำนวน</span>${stepper(r.id, r.count, 'stepRoom', '%:-1', '%:1', 'sm')}<input class="price" data-r="${r.id}:price" inputmode="numeric" placeholder="ราคา" value="${esc(r.price)}" aria-label="ราคาต่อคืน (บาท)"><span>บาท/คืน</span></div></div>`).join('');
   h += `<p id="room-sum" class="rsum">${roomSumHtml()}</p>`;
-  h += `<p class="lbl">สิ่งอำนวยความสะดวก</p><div class="chipset">${AMENITIES.map(a => chip(a, i.amenities.includes(a), 'toggleAmenity', a)).join('')}${chip('อื่นๆ', i.amenityOtherOn, 'toggleAmenity', '__other')}</div>`;
-  if (i.amenityOtherOn) h += field('amenityOther', 'ระบุสิ่งอำนวยความสะดวกอื่น ๆ (คั่นด้วยจุลภาค)', i.amenityOther);
+  h += `<p class="lbl">สิ่งอำนวยความสะดวก</p><div class="chipset">${AMENITIES.map(a => chip(a, i.amenities.includes(a), 'toggleAmenity', a)).join('')}${chip('อื่น ๆ', i.amenityOtherOn, 'toggleAmenity', '__other')}</div>`;
+  if (i.amenityOtherOn) h += field('amenityOther', 'ระบุสิ่งอำนวยความสะดวกอื่น ๆ (คั่นแต่ละรายการด้วยเครื่องหมาย , )', i.amenityOther);
   return h + photosHtml() + field('features', 'เรื่องอื่น ๆ ที่อยากบอกแขก (ไม่บังคับ)', i.features);
 }
 
