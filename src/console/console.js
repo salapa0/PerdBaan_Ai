@@ -42,7 +42,7 @@ export function renderConsole() {
         + `<button class="btn" data-a="simulateAgoda" ${c.linkSent && !c.live ? '' : 'disabled'}>${esc(p.verify.btn)} (Shift+A)</button>` + connLines();
     }
     else h += connLines() + `<button class="btn ghost" data-a="reset">รีเซ็ตทั้งหมด (Shift+R)</button>`;
-    if (s.customers.length) h += `<p class="muted">ลูกค้าที่ทักเข้ามา ${s.customers.length} ราย · รายได้รวม (ประมาณการ) ${s.customers.reduce((n, c) => n + c.amount, 0).toLocaleString('en-US')} บาท</p>`;
+    if (s.customers.length) { const ok = s.customers.filter(c => c.confirmed); h += `<p class="muted">คำขอจากช่องทาง ${s.customers.length} ราย · ยืนยันการจองจริง ${ok.length} ราย · รายได้รวม (ประมาณการ) ${ok.reduce((n, c) => n + c.amount, 0).toLocaleString('en-US')} บาท</p>`; }
     h += `<button class="btn ghost" data-a="simulateCustomer">จำลองลูกค้าทักเข้ามา (Shift+C)</button>`;
   }
   $('#console-body').innerHTML = h; renderChecks();

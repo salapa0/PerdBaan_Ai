@@ -64,7 +64,10 @@ textarea{resize:vertical}
 .fx button{display:block;width:100%;border:0;border-top:1px solid var(--line);background:#fff;color:#0a7f33;font-weight:700;padding:11px;cursor:pointer}
 .chips{display:flex;justify-content:flex-end;margin-top:14px}
 .chips button{border:0;background:#fff;color:#0a7f33;border-radius:99px;padding:7px 18px;font-weight:700;cursor:pointer}
-.av.cust{background:#8a6d3b}.bub.cust{border:1px solid var(--line)}.cust-name{display:block;color:var(--mute);font-size:11px;margin-bottom:2px}
+.bub.fx.ping{width:250px}.ping-via,.ping-est{display:block;color:var(--mute);font-size:11px}.ping-via{margin-bottom:4px}.ping-est{margin-top:6px}
+.fx button.ping-link{color:#1a5fd0;font-weight:400;font-size:13px;text-align:left;padding:10px 14px}.fx button.ping-link:hover{text-decoration:underline}
+.pop-bg{position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:15}.pop{position:absolute;left:24px;right:24px;top:50%;transform:translateY(-50%);background:#fff;border-radius:16px;padding:20px;z-index:16;text-align:center}.pop>b{display:block;font-size:17px;margin-bottom:8px}.pop .spin{margin:16px auto}.pop .btn{margin-top:12px}
+.ping-ok{display:block;padding:11px;border-top:1px solid var(--line);text-align:center;color:#0a7f33;font-size:13px;font-weight:700}
 .fin-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0}.fin-row+.fin-row{border-top:1px solid var(--line)}
 .menubar{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;border:0;background:#f4f4f4;padding:7px;font-weight:700;color:var(--ink);cursor:pointer}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
